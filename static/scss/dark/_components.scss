@@ -1,0 +1,155 @@
+//
+// components.scss
+//
+//Buttons
+@each $name,
+$value in $colors {
+    .btn-#{$name} {
+        background-color: #{$value} !important;
+        border: 1px solid #{$value} !important;
+        color: $dark !important;
+        box-shadow: 0 3px 5px 0 rgba($value, 0.3);
+        &:hover, &:focus, &:active, &.active, &.focus{
+            background-color: darken($value, 10%) !important;
+            border-color: darken($value, 10%) !important;
+            color: $dark !important;
+        }
+    }
+
+    .btn-soft-#{$name} {
+        background-color: rgba($value, 0.2) !important;
+        border: 1px solid rgba($value, 0.2) !important;
+        color: #{$value} !important;
+        box-shadow: 0 3px 5px 0 rgba($value, 0.3);
+        &:hover, &:focus, &:active, &.active, &.focus{
+            background-color: #{$value} !important;
+            border-color: #{$value} !important;
+            color: $dark !important;
+        }
+    }
+
+    .btn-outline-#{$name} {
+        border: 1px solid #{$value};
+        color: #{$value};
+        background-color: transparent;    
+        &:hover, &:focus, &:active, &.active, &.focus, &:not(:disabled):not(.disabled):active{
+            background-color: #{$value};
+            border-color: #{$value};
+            color: $dark !important;
+            box-shadow: 0 3px 5px 0 rgba($value, 0.3);
+        }
+    }
+}
+.btn {
+    &.btn-dark {
+        color: $white !important;
+        background: $dark;
+        border: 1px solid $gray-100 !important;
+        &:hover, &:focus, &:active, &.active, &.focus {
+            background-color: darken($dark, 5%) !important;
+            color: $white !important; 
+        }
+    }    
+    &.btn-soft-dark {
+        color: rgba($dark, 0.5) !important;
+        border: 1px solid $gray-100 !important;
+        &:hover, &:focus, &:active, &.active, &.focus{
+            color: $white !important; 
+        }
+    }    
+    &.btn-outline-dark {
+        border: 1px solid $gray-100 !important;
+        color: $dark !important;
+        background-color: transparent;    
+        &:hover, &:focus, &:active, &.active, &.focus {
+            background-color: $dark !important;
+            color: $white !important;
+        }
+    }
+    &.btn-light {
+        color: $dark !important;
+        border-color: darken($gray-200, 15%) !important;
+        &:hover, &:focus, &:active, &.active, &.focus{
+            background-color: lighten($light, 10%) !important;
+            color: $dark !important;
+        }
+    }    
+    &.btn-soft-light {
+        color: rgba($dark, 0.5) !important;
+        border: 1px solid darken($gray-200, 15%) !important;
+        &:hover, &:focus, &:active, &.active, &.focus{
+            color: $dark !important; 
+        }
+    }    
+    &.btn-outline-light {
+        border-color: darken($gray-200, 15%) !important;
+        color: $dark !important;
+        &:hover, &:focus, &:active, &.active, &.focus{
+            background-color: lighten($light, 10%) !important;
+            color: $dark !important;
+        }
+    }
+}
+
+//Shadow 
+.shadow {
+    box-shadow: $shadow !important;
+}
+.shadow-lg {
+    box-shadow: $shadow-lg !important;
+}
+.shadow-md {
+    box-shadow: $shadow-md !important;
+}
+
+//back to top and Shape
+.home-shape-arrow {
+    i {
+        box-shadow: $shadow-md;
+        &:hover {
+            color: $dark !important;
+        }
+    }
+}
+
+//Form
+.form-label,
+.form-check-label {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.form-control {
+    border: 1px solid $gray-200;
+    background-color: $white;
+    &:focus {
+        border-color: $primary;
+    }
+    &[readonly] {
+        background-color: $white;
+    }
+    &:disabled {
+        background-color: $gray-200;
+    }
+}
+
+//Social icons
+.social-icon {
+    li {
+        a {
+            color: $dark;
+            border: 1px solid $dark;
+            &:hover {
+                color: $white !important;
+            }
+        }
+    }
+    &.social {
+        li {
+            a {
+                color: $gray-300;
+                border-color: $gray-300;
+            }
+        }
+    }
+}

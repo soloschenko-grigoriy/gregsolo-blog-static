@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+            <title>Building a Game With TypeScript. Pathfinding and Movement 2/7. Highlighting Locomotion Range - Greg Solo's Blog</title>
+            <meta name="description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs" />
+            <meta name="keywords" content="TypeScript, Gamedev, tutorial, browser APIs, Locomotion, Movement, Pathfinding, game" />
+
+            <meta property="og:title" content="Building a Game With TypeScript. Pathfinding and Movement 2/7. Highlighting Locomotion Range by Greg Solo">
+            <meta property="og:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="og:site_name" content="Greg Solo's Blog">
+            <meta property="og:type" content="article">
+            <meta property="og:url" content="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">
+            <meta property="og:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range.png">
+
+            <meta property="twitter:card" content="summary_large_image">
+            <meta property="twitter:title" content="Building a Game With TypeScript. Pathfinding and Movement 2/7. Highlighting Locomotion Range by Greg Solo">
+            <meta property="twitter:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="twitter:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range.png">
+            <meta property="twitter:site" content="Greg Solo's Blog">
+    
+    <meta content="Greg Solo" name="author" />
+    <meta content="greg.solo.cv@gmail.com" name="mail" />
+    <meta content="https://blog.gregsolo.me" name="website" />
+
+    <!-- favicon -->
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Tobii Lightbox -->
+    <link href="/css/tobii.min.css" rel="stylesheet" type="text/css" />
+    <!-- Slider -->
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <!-- Icons -->
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css">
+    <!-- Main Css -->
+    <link href="/css/style.min.css" rel="stylesheet" type="text/css" id="theme-opt" />
+    <link href="/css/colors/blue.css" rel="stylesheet" id="color-opt">
+    <link href="/css/extra.css" rel="stylesheet">
+    <link href="/css/github-dark-dimmed.css" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KV7Z4BNVS1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-KV7Z4BNVS1');
+    </script>
+</head>
+<html>
+  <body>
+        <!-- Navbar STart -->
+        <header id="topnav" class="defaultscroll sticky">
+            <div class="container">
+                <!-- Logo container-->
+                <ul class="list-unstyled social-icon text-sm-end social mt-3" style="float: left;">
+                    <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i
+                        class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                </ul>
+                <!-- End Logo container-->
+                <div class="menu-extras">
+                    <div class="menu-item">
+                        <!-- Mobile menu toggle-->
+                        <a class="navbar-toggle" id="isToggle" onclick="toggleMenu()">
+                            <div class="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </a>
+                        <!-- End mobile menu toggle-->
+                    </div>
+                </div>
+    
+                <div id="navigation">
+                    <!-- Navigation Menu-->
+                    <ul class="navigation-menu">
+                        <li class="has-submenu parent-menu-item">
+                            <a href="/">All Articles</a>
+                        </li>
+                        <li class="has-submenu parent-menu-item">
+                            <a href="https://gregsolo.me" target="_blank">About me</a>
+                        </li>
+    
+                        <li><a href="https://gregsolo.me/#contact" target="_blank" class="sub-menu-item">Get in Touch</a></li>
+                    </ul>
+                    <!--end navigation menu-->
+                </div>
+                <!--end navigation-->
+            </div>
+            <!--end container-->
+        </header>
+        <!--end header-->
+        <!-- Navbar End -->
+    <section class="section">
+        <div class="container">
+            <div class="row mt-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="title-heading article">
+                            <h1 class="mb-0">Building a Game With TypeScript. Pathfinding and Movement 2/7. Highlighting Locomotion Range</h1>
+                            <p class="text-soft-primary mt-3"><p>Chapter VI in the <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">series</a> of tutorials on how to build a game from scratch with TypeScript and native browser APIs</p></p>
+    
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li class="list-inline-item small font-weight-normal user text-muted me-2"><i class="uil uil-user text-dark"></i> Greg Solo</li>
+                                <li class="list-inline-item small font-weight-normal tag text-muted me-2">
+                                    <a href="/category/gamedev" class="text-muted"><i class="uil uil-tag-alt text-dark"></i> GameDev</a></li>
+                                <li class="list-inline-item small font-weight-normal date text-muted"><i class="uil uil-calendar-alt text-dark"></i> July 24 2022</li>
+                                <li class="list-inline-item small font-weight-normal date text-muted">
+                                    &nbsp;<a target="_blank" class="text-muted" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+                                </li>
+                            </ul>
+                            <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/4133817.jpg" class="img-fluid rounded shadow" style="margin-top: 0;margin-bottom: 0" alt="Building a Game With TypeScript. Pathfinding and Movement 2/7. Highlighting Locomotion Range">
+                            
+                            <p><a href="https://www.freepik.com/vectors/navigation">Navigation vector created by storyset - www.freepik.com</a></p>
+    <p>Welcome back, folks! Last time we prepared a foundation: discussed rules of locomotion and introduced hand-made debug tools. We will need them soon enough.</p>
+    <p>Before we start moving Ships around, we should configure the range of their movement. It would be too easy if our Ships could magically teleport from a very distant place (though, it can be a nice feature to have for some exclusive Ships).</p>
+    <p>There are many ways how we can set up a locomotion range. One of them is by introducing the idea of “neighbor”: a property of the <code>Node</code> that references all nearby <code>Nodes</code>. With this reference, it becomes very easy to determine range by recursively traversing neighbors until we hit the range boundary.</p>
+    <p>In Chapter VI <em>“Pathfinding and Movement”</em>, we finally make our Ships alive! You can find other Chapters of this series here:
+    <br><br></p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, Part 2, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3<a/>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>,<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    <blockquote>
+    <p>Feel free to switch to the <code>movement-pathfinding-1</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>. It contains the working result of the previous posts and is a great starting point for this one.</p>
+    </blockquote>
+    <hr>
+    <h2>Table of Contents</h2>
+    <ol>
+    <li>Introduction</li>
+    <li>Good Neighbors</li>
+    <li>Highlighting Nodes</li>
+    <li>Finding in Range</li>
+    <li>Activating Ship</li>
+    <li>Node with a Ship</li>
+    <li>Conclusion</li>
+    </ol>
+    <hr>
+    <h2>Good Neighbors</h2>
+    <p>I'll start by adding the <code>Neighbors</code> property to the <code>Node</code>:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity {
+      // ... //
+      constructor(
+        public readonly Start: Vector2D,
+        public readonly End: Vector2D,
+        public readonly Index: Vector2D,
+        public readonly Neighbors: Node[] // &lt;--- ADD
+      ) {
+        super()
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>We never expect to change this property hence it is <code>readonly</code>. We also going to configure it once during construction and be done with it.</p>
+    <p>Now, when we construct all <code>Nodes</code> on the <code>Grid</code> we have to provide a promised array:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    export class Grid extends Entity {
+      // ... //
+      private InitNodes(): void {
+        // ... //
+        const index = new Vector2D(x, y)
+    
+        const neighbors: Node[] = [] // &lt;--- ADD
+        const node = new Node(start, end, index, neighbors) // &lt;--- CHANGE
+        this._nodes.push(node)
+      }
+    }
+    </code></pre>
+    <p>Good, but we can hardly benefit from an empty array. We have to determine what Nodes can be neighbors of any given <code>Node</code>. And our newly developed debug tool should help us visualize it. Let's pick any one <code>Node</code> as an example, let's say the one with the coordinates (2,2):
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-1.png" alt=""></p>
+    <p>Let’s agree that by “neighbors” we understand <code>Nodes</code> that are directly connected to the chosen one. For <code>Node</code> (2,2) those are these blue ones:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-2.png" alt=""></p>
+    <p>Looks like <code>Node</code> (2,2) has 4 neighbors: one on its top, one on its right, one below, and one on the left. How can we programmatically recognize them? Our humble debug tool shows it quite clearly: we can use index (coordinate) of the <code>Node</code> and add or subtract 1 point to/from every dimension of it. So, for our “red” <code>Node</code> with index (2,2), neighbors are:</p>
+    <ul>
+    <li>top: (2,1), which is (2,2) -  (0, 1)</li>
+    <li>right: (3,2) which is (2,2) + (1, 0)</li>
+    <li>bottom (2,3) which is (2,2) + (0, 1)</li>
+    <li>left (1,2) which is (2,2) - (1, 0)</li>
+    </ul>
+    <p>If you recall, we create <code>Nodes</code> progressively, starting from the top left corner. We can use this to our advantage to locate the top and left neighbors among nodes that were already generated:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    export class Grid extends Entity {
+      // ... //
+    
+      private InitNodes(): void {
+        // ... //
+        const index = new Vector2D(x, y)
+    
+        // --- ADD --- //
+        const top = this.Nodes.find(node =&gt; node.Index.x === index.x &amp;&amp; node.Index.y === index.y - 1)
+        const left = this.Nodes.find(node =&gt; node.Index.x === index.x - 1 &amp;&amp; node.Index.y === index.y)
+        // --- ADD --- //
+    
+        const neighbors: Node[] = []
+        const node = new Node(start, end, index, neighbors)
+        this._nodes.push(node)
+      }
+    }
+    </code></pre>
+    <p>Just as we discussed, I deduct 1 from the respective coordinate to locate the <code>top</code>
+    or <code>left</code> neighbor. But what about <code>right</code> and <code>bottom</code>? Well, we can pull a little trick.</p>
+    <p>There is a direct correlation between neighbors: if node A is a <code>top</code>  neighbor of Node B it means that node B is a <code>bottom</code> neighbor of Node A. It may sound confusing, but let’s visualize it again:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-3.png" alt=""></p>
+    <p>Look at our red <code>Node</code>. It has a <code>top</code> neighbor, the blue <code>Node</code>. In turn, the blue <code>Node</code> has a <code>bottom</code> neighbor: the red <code>Node</code>. The same goes with relations <code>left-right</code>. Knowing this &quot;mirror&quot; relationship we can do something like this:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    export class Grid extends Entity {
+      // ... //
+    
+      private InitNodes(): void {
+        // ... //
+        const index = new Vector2D(x, y)
+    
+        const top = this.Nodes.find(node =&gt; node.Index.x === index.x &amp;&amp; node.Index.y === index.y - 1)
+        const left = this.Nodes.find(node =&gt; node.Index.x === index.x - 1 &amp;&amp; node.Index.y === index.y)
+        
+        const neighbors: Node[] = []
+        const node = new Node(start, end, index, neighbors)
+    
+        // --- ADD --- //
+        neighbors.push(left)
+        left.Neighbors.push(node)
+    
+        neighbors.push(top)
+        top.Neighbors.push(node)
+        // --- ADD --- //
+        this._nodes.push(node)
+      }
+    }
+    </code></pre>
+    <p>But TypeScript is nice enough to warn us about possible error: <code>top</code> and <code>left</code> are possibly undefined. While technically speaking compiler complaints only because <code>Array.find</code> can return undefined, it actually helps us catch an error in our logic. There is a possibility for <code>top</code> or <code>left</code> to be undefined and we can quickly visualize this scenario:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-4.png" alt=""></p>
+    <p>The very first <code>Node</code>, the one located under index (0,0) simply cannot have any top or left neighbors. Similarly, (0,2) has a top but does not have a left one. Node with index (2,0) has left neighbor but not top one. We could analyze this by checking negative coordinates but we can do even simpler:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    export class Grid extends Entity {
+      // ... //
+    
+      private InitNodes(): void {
+        // ... //
+        const index = new Vector2D(x, y)
+    
+        const top = this.Nodes.find(node =&gt; node.Index.x === index.x &amp;&amp; node.Index.y === index.y - 1)
+        const left = this.Nodes.find(node =&gt; node.Index.x === index.x - 1 &amp;&amp; node.Index.y === index.y)
+        
+        const neighbors: Node[] = []
+        const node = new Node(start, end, index, neighbors)
+    
+        // --- CHANGE --- //
+        if (left) {
+          neighbors.push(left)
+          left.Neighbors.push(node)
+        }
+    
+        if (top) {
+           neighbors.push(top)
+           top.Neighbors.push(node)
+        }
+        // --- CHANGE --- //
+    
+        this._nodes.push(node)
+      }
+    }
+    </code></pre>
+    <p>It is sufficient to check the only existence of the top/left <code>Nodes</code>. If there is one, we will use them. Since we generate <code>Nodes</code> from the top left corner we guaranteed to have top or left <code>Nodes</code> if possible.</p>
+    <p>But compiler still argues that we are not done yet. Indeed, we have one more place to update: the mock. Fortunately, its a trivial change:</p>
+    <pre><code class="language-ts">// src/node/node.mock.ts
+    // ... //
+    export const mockNodeFactory = (
+      start = new Vector2D(0, 0),
+      end = new Vector2D(1, 1),
+      index = new Vector2D(0, 0),
+      neighbors: Node[] = [], // &lt;--- ADD
+    ): Node =&gt; new Node(start, end, index, neighbors) // &lt;--- CHANGE
+    </code></pre>
+    <p>This makes TypeScript happy again, great job! Now when neighbors are all set we can move on to the next part: the highlighting.</p>
+    <hr>
+    <h2>Highlighting Nodes</h2>
+    <p>We have already used highlighting before. If you recall, we drew <code>Nodes</code>  in a different color after the Player clicks them. In fact, we even have a color setup for us in the settings. We called all this <code>active</code> but let’s refactor it to something more meaningful:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    // ... //
+    export const Settings = Object.freeze({
+      grid: {
+        dimension: 6,
+        nodeSize: 100,
+        nodeOffset: 10,
+        color: {
+          regular: new Color(245, 245, 245, 1),
+          inLocomotionRange: new Color(176, 190, 197, 1) // &lt;--- CHANGE
+        }
+      },
+      // ... //
+    }
+    </code></pre>
+    <p>Let’s preserve <code>IsActive</code> for now, we will clean it up soon too:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity { 
+      /**
+       * @todo replace temp property with real functionality
+       */
+      public IsActive = false
+      public IsInLocomotionRange = false // &lt;--- ADD
+    
+      // ... //
+    }
+    </code></pre>
+    <p>And then update consumers on this setting:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.ts
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //
+      private Draw(): void {
+        CanvasLayer.Background.FillRect(
+          this.Entity.Start,
+          this.Entity.Size,
+          this.Entity.IsInLocomotionRange ? Settings.grid.color.inLocomotionRange : Settings.grid.color.regular // &lt;--- CHANGE
+        )
+      }
+    
+      // ... //
+    }
+    </code></pre>
+    <pre><code class="language-ts">// src/node/components/draw/draw.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Node Draw Component', () =&gt; {
+      // ... //
+      it('should render range color if entity is in range and regular color otherwise', () =&gt; { // &lt;--- CHANGE
+        const spyFillRect = jest.spyOn(CanvasLayer.Background, 'FillRect')
+    
+        comp.Entity.IsInLocomotionRange = true // &lt;--- CHANGE
+        comp.Update(0)
+        expect(spyFillRect).toBeCalledWith(comp.Entity.Start, comp.Entity.Size, Settings.grid.color.inLocomotionRange) // &lt;--- CHANGE
+    
+        comp.Entity.IsInLocomotionRange = false // &lt;--- CHANGE
+        comp.Update(0)
+        expect(spyFillRect).toBeCalledWith(comp.Entity.Start, comp.Entity.Size, Settings.grid.color.regular)
+      })
+    })
+    </code></pre>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>.  Nice!
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-9.png" alt=""></p>
+    <hr>
+    <h2>Finding in range</h2>
+    <p>Now, with the help of neighbors we can  easily look up for all of them that are in range:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity {
+      // ... //
+     
+      // --- ADD --- //
+      public FindAndSetInLocomotionRange(range: number): void {}
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>First, we highlight the current <code>Node</code>, which is a “center”</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity {
+      // ... //
+     
+      public FindAndSetInLocomotionRange(range: number): void {
+        this.IsInLocomotionRange = true // &lt;--- ADD
+      }
+    }
+    </code></pre>
+    <p>And then recursively repeat for all neighbors until we reach the range:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity {
+      // ... //
+    
+     
+      public FindAndSetInLocomotionRange(range: number): void {
+        this.IsInLocomotionRange = true 
+    
+        // --- ADD --- //
+        const newRange = --range
+        if (newRange &lt;= 0) {
+          return
+        }
+    
+        this.Neighbors
+          .map(neighbor =&gt; neighbor.FindAndSetInLocomotionRange(range))
+        // --- ADD --- //
+      }
+    }
+    </code></pre>
+    <p>Before we go any further, it's a good idea to cover this code with some tests:</p>
+    <pre><code class="language-ts">// src/node/node.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Node', () =&gt; {
+      // ... //
+      // --- ADD --- //
+      it('should find and set inLocomotionRange', () =&gt; { })
+      // --- ADD --- //
+    })
+    </code></pre>
+    <p>First, we need some neighbors:</p>
+    <pre><code class="language-ts">// src/node/node.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Node', () =&gt; {
+      const start = new Vector2D(1, 2)
+      const end = new Vector2D(5, 6)
+    
+      // --- ADD --- //
+      const index = new Vector2D(1, 1)
+      const neighborTop = mockNodeFactory(new Vector2D(1, 0))
+      const neighborRight = mockNodeFactory(new Vector2D(1, 0))
+      const neighborBottom = mockNodeFactory(new Vector2D(1, 0))
+      const neighborLeft = mockNodeFactory(new Vector2D(1, 0))
+    
+      const neighbors = [
+        neighborTop,
+        neighborRight,
+        neighborBottom,
+        neighborLeft,
+      ]
+      // --- ADD --- //
+      let node: Node
+    
+      beforeEach(() =&gt; {
+        node = mockNodeFactory(start, end, index, neighbors) // &lt;--- CHANGE
+      })
+    </code></pre>
+    <p>We simply create neighbors on all sides of the tested <code>Node</code>. With that in place we can verify if they indeed have been highlighted:</p>
+    <pre><code class="language-ts">// src/node/node.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Node', () =&gt; {
+      //  ... //
+      it('should find and set inLocomotionRange', () =&gt; { 
+        // --- ADD --- //
+        expect(neighborTop.IsInLocomotionRange).toBeFalsy()
+        expect(neighborRight.IsInLocomotionRange).toBeFalsy()
+        expect(neighborBottom.IsInLocomotionRange).toBeFalsy()
+        expect(neighborLeft.IsInLocomotionRange).toBeFalsy()
+        node.FindAndSetInLocomotionRange(2)
+        expect(neighborTop.IsInLocomotionRange).toBeTruthy()
+        expect(neighborRight.IsInLocomotionRange).toBeTruthy()
+        expect(neighborBottom.IsInLocomotionRange).toBeTruthy()
+        expect(neighborLeft.IsInLocomotionRange).toBeTruthy()
+        // --- ADD --- //
+      })
+    })
+    </code></pre>
+    <p>The approach should be familiar, we did a similar thing a few times before. First, we check that neighbors are in the initial state, aka not highlighted. Then, after invoking <code>node.FindAndSetInLocomotionRange</code> they should be.</p>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-16.png" alt=""></p>
+    <hr>
+    <h2>Activating Ship</h2>
+    <p>Great, but when exactly should we highlight nodes in the range? It doesn't make sense to always highlight because <code>Ships</code> not always can move. If you recall, the player can move only one <code>Ship</code> at a time and, of course, they cannot move the enemy’s  <code>Ships</code>.  To make this logic possible let’s introduce the concept of “active” <code>Ship</code>.  We will talk a lot about what “active” <code>Ship</code> can and cannot do when we will start building a state machine for it. The only thing that matters to us now is that a) <code>Ship</code> can be active and b) when it is, we highlight locomotion range.</p>
+    <p>First is achievable by simply introducing a new field:</p>
+    <pre><code class="language-ts">// src/ship/ship.ts
+    // ... //
+    export class Ship extends Entity {
+      private readonly _locomotionComponent: ShipLocomotionComponent
+    
+      // --- ADD --- //
+      private _isActive = false
+    
+      public get IsActive(): boolean {
+        return this._isActive
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>The second is also simple enough. As soon as any particular <code>Ship</code> becomes active, we should invoke <code>node.FindAndSetInLocomotionRange</code>, where <code>node</code> is the current position of the <code>Ship</code>:</p>
+    <pre><code class="language-ts">// src/ship/ship.ts
+    // ... //
+    export class Ship extends Entity {
+      private readonly _locomotionComponent: ShipLocomotionComponent
+      private _isActive = false;
+    
+      public get IsActive(): boolean {
+        return this._isActive
+      }
+    
+      // --- ADD --- //
+      public set IsActive(v: boolean) {
+        this._isActive = v
+    
+        if (v) {
+          this._locomotionComponent.Node.FindAndSetInLocomotionRange(2)
+        }
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>TypeScript righteously complains that there is a possibility for <code>node</code> to be null. Indeed, the way we set up the <code>locomotion</code> component it surely can contain an empty node. We can fix this compiler error by introducing an additional check but I suggest we simplify our lives and assume that as long as <code>Ship</code> exists, it <strong>always</strong> stands on some <code>node</code>.</p>
+    <p>To achieve that we have to refactor a bit, starting with the locomotion component. First, we can make its constructor expect the <code>Node</code>:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    // ... //
+    export class ShipLocomotionComponent implements IComponent {
+      // ... //
+      public get Position(): Vector2D | null {
+        return this.Node ? this.Node.Center : null
+      }
+    
+      // --- ADD --- //
+      constructor(node: Node) {
+        this.Node = node
+      }
+      // --- ADD --- //
+      // ... //
+    }
+    </code></pre>
+    <p>This way we store <code>Node</code> as soon as the component gets constructed. This opens doors for removing the null check in the component itself:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    // ... //
+    export class ShipLocomotionComponent implements IComponent {
+      public Entity: Ship
+    
+      private _node: Node // &lt;--- CHANGE
+    
+      public get Node(): Node { // &lt;--- CHANGE
+        return this._node
+      }
+    
+      public set Node(v: Node) { // &lt;--- CHANGE
+        this._node = v
+      }
+    
+      public get Position(): Vector2D { // &lt;--- CHANGE
+        return this.Node.Center // &lt;--- CHANGE
+      }
+    
+      constructor(node: Node) {
+        this.Node = node
+      }
+    
+      // ... //
+    }
+    </code></pre>
+    <p>And makes code a little bit cleaner. We also have to fix the missing node in the <code>Ship</code> where we construct the component. Effectively, instead of assigning <code>node</code> to a field, we supply it directly to the constructor:</p>
+    <pre><code class="language-ts">// src/ship/ship.ts
+    // ... //
+    export class Ship extends Entity {
+      // ... //
+      constructor(public readonly Factory: Fleet, node: Node) {
+        super()
+    
+        this._locomotionComponent = new ShipLocomotionComponent(node) // &lt;--- CHANGE
+        this._locomotionComponent.Node = node // &lt;--- REMOVE
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>Great! Now we can activate the <code>Ship</code>. Again, we are not bothered for now with all the interesting logic “why” and “when” <code>Ship</code> gets activated. Let’s just hardcode that the very first <code>Ship</code> of the player’s fleet is activated when the fleet is constructed:</p>
+    <pre><code class="language-ts">// src/fleet/fleet.ts
+    // ... // 
+    export class Fleet extends Entity {
+      // ... //
+      private PrepareShips(): void {
+        // ... //
+        // --- ADD --- //
+        // @todo start with state machine
+        if (this.Team === Team.A) {
+          this._ships[0].IsActive = true
+        }
+        // --- ADD --- //
+      }
+    }
+    </code></pre>
+    <p>And that’s it! As soon as we have done this we should see the highlighted nodes in the range:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-5.png" alt=""></p>
+    <p>Before we go any further, there is something that bugs me. If you have noticed, we’ve been hardcoding the <code>range</code> value all this time. Ideally, we want this to be customizable and decoupled from the code. Fortunately, we have a perfect place for that:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    export const Settings = Object.freeze({
+      // ... //
+      ships: {
+        // ... //
+        colors: {
+          a: new Color(187, 222, 251, 1),
+          b: new Color(255, 236, 179, 1)
+        },
+        // --- ADD --- //
+        locomotion: {
+          range: 3,
+          duration: 300
+        },
+      },
+    })
+    </code></pre>
+    <p>Here I added a dedicated section for the Ship's locomotion settings. For now, we have only two: <code>range</code> and <code>duration</code>. We don’t need the latter right now but we will soon enough.</p>
+    <p>Now, we can use this setting:</p>
+    <pre><code class="language-ts">// src/ship/ship.ts
+    // ... //
+    import { Node } from '@/node'
+    import { Settings } from '@/settings' // &lt;--- ADD
+    
+    export class Ship extends Entity {
+      // ... //
+      public set IsActive(v: boolean) {
+        this._isActive = v
+    
+        if (v) {
+          this._locomotionComponent.Node.FindAndSetInLocomotionRange(Settings.ships.locomotion.range) // &lt;--- CHANGE
+        }
+      }
+    }
+    </code></pre>
+    <p>Code should still compile, the test should still pass and our game should now look like this:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-6.png" alt=""></p>
+    <p>Great but you may notice that something is slightly off. Node under <code>Ship</code> itself is highlighted too. That is definitely a mistake because we cannot locomote to the node if it is already occupied. To solve this mystery we can make <code>Node</code> to be aware of <code>Ship</code> occupies it.</p>
+    <hr>
+    <h2>Node with a Ship</h2>
+    <p>That's right, we add one more field to the <code>Node</code> entity:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    import { Ship } from '@/ship' // &lt;--- ADD
+    import { Entity, Vector2D } from '@/utils'
+    // ... //
+    export class Node extends Entity {
+      // ... //
+      public IsActive = false
+      public Ship: Ship | null = null // &lt;--- ADD
+      public IsInLocomotionRange = false
+      // ... //
+    }
+    </code></pre>
+    <p>Unlike <code>Ship</code>, a <code>Node</code> can easily exist without any resident, hence Ship field is <code>null</code> by default. Having this property in place, we can rely on it to check locomotion range:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity {
+      // ... //
+      public FindAndSetInLocomotionRange(range: number): void {
+        // --- ADD --- //
+        if (!this.Ship) {
+          this.IsInLocomotionRange = true
+        }
+        // --- ADD --- //
+    
+        this.IsInLocomotionRange = true  // &lt;--- REMOVE
+        // ... //
+      }
+    }
+    </code></pre>
+    <p>That doesn't work out of the shelf: occupied <code>Node</code> (0,0) is still highlighted:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-7.png" alt=""></p>
+    <p>To figure out what is wrong we can summon help of our little debug tool once more:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.ts
+    import { IComponent, Color, Vector2D } from '@/utils' // &lt;--- CHANGE
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //
+      private DrawDebugInfo(): void {
+        // ... //
+        // --- ADD --- //
+        if (this.Entity.Ship) {
+          CanvasLayer.Background.DrawText(
+            'Ship',
+            new Vector2D(entity.Start.x + 40, entity.Start.y),
+            new Color(255, 0, 0, 1)
+          )
+        }
+        // --- ADD --- //
+      }
+    }
+    </code></pre>
+    <p>What happens here? I simply ask <code>DrawDebugInfo</code> to render one more piece of debug information: text “Ship” if this <code>Node</code> is aware of the presence of some <code>Ship</code> on it. Apparently, <code>Node</code> (0,0) is not aware because we see no extra text:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-8.png" alt=""></p>
+    <p>This happens because… well, we never assigned this field with a value. We should set it as soon as <code>Ship</code> “lands” on “Node”:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    // ... //
+    export class ShipLocomotionComponent implements IComponent {
+      // ... //
+      public set Node(v: Node) {
+        this._node = v
+        this._node.Ship = this.Entity // &lt;--- ADD
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>Aaaaand that does not work. If we debug <code>this. Entity</code> right after <code>this._node.Ship = this.Entity</code> we can see something peculiar: it’s <code>undefined</code>!</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    // ... //
+    export class ShipLocomotionComponent implements IComponent {
+      // ... //
+      public set Node(v: Node) {
+        this._node = v
+        this._node.Ship = this.Entity 
+        console.log(this.Entity) // &lt;--- ADD
+      }
+      // ... //
+    }
+    </code></pre>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-9.png" alt=""></p>
+    <p>How is that possible? Isn’t <code>Entity</code> suppose to be always available? Well, yes. <em>After</em> it gets constructed. This setter fires because we set <code>Node</code> in the <code>ShipLocomotionComponent</code> constructor:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    // ... //
+    export class ShipLocomotionComponent implements IComponent {
+      // ... //
+      constructor(node: Node) {
+        this.Node = node // &lt;--- this guy
+      }
+      // ... //
+    } 
+    </code></pre>
+    <p>Which, in turn, is called within <code>Ship's</code> constructor:</p>
+    <pre><code class="language-ts">// src/ship/ship.ts
+    // ... //
+    export class Ship extends Entity {
+      // ... //
+      constructor(public readonly Factory: Fleet, node: Node) {
+        super()
+    
+        this._locomotionComponent = new ShipLocomotionComponent(node) // &lt;--- this guy
+      }
+    
+      // ... //
+    }
+    </code></pre>
+    <p>So, technically speaking, <code>Ship</code> has not been constructed <em>yet</em>. Fortunately for us, we have a separate lifecycle event that fires <em>after</em> both component and entity have been instantiated: <code>Awake</code>. Let us use the power of our humble entity/component architecture to solve this issue:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    // ... //
+    export class ShipLocomotionComponent implements IComponent {
+      public set Node(v: Node) {
+        this._node = v
+        this._node.Ship = this.Entity
+        console.log(this.Entity) // &lt;--- REMOVE
+      }
+    
+      // ... //
+    
+      constructor(node: Node) {
+        this._node = node
+      }
+      
+      public Awake(): void {
+        /* @todo */ // &lt;--- REMOVE
+        this._node.Ship = this.Entity // &lt;--- ADD
+      }
+    } 
+    </code></pre>
+    <p>Notice, that I bypass setter by directly assigning <code>this._node</code> instead of <code>this.Node = node</code>. We know for sure that there is no entity yet, so no need to trouble the setter yet. But when in future <code>Ship</code> will change its position (read: change its <code>Node</code>) setter will automatically update <code>Node</code> with the reference to this <code>Ship</code>.</p>
+    <blockquote>
+    <p>Note: We also need to clean up after changing position and we will get there in the next installments</p>
+    </blockquote>
+    <p>And our hard work was rewarded:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-10.png" alt=""></p>
+    <p>Debug tools now show proper “Ship” text and occupied <code>Node</code> is not highlighted. Nice, but we have one nasty edge case. To illustrate it, let me temporary increase amount of <code>Ships</code> in the player’s fleet:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    // ... //
+    export const Settings = Object.freeze({
+      // ... //
+      ships: {
+        fleetSize: 2, // &lt;--- CHANGE
+        // ... //
+      }
+    })
+    </code></pre>
+    <p>The game now looks like this:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-11.png" alt=""></p>
+    <p>Did you notice anything suspicious? Let's stop for a second and think about what we see. We set up our locomotion range to be <code>3</code>. That means, <code>Ship</code> can move up to two <code>Nodes</code> ahead. Something like this:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-12.gif" alt=""></p>
+    <p>Notice, that <code>Ship</code> moves through 2 <code>Nodes</code>, step by step. This is also true if it moves diagonally:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-13.gif" alt=""></p>
+    <p>This works because all <code>Nodes</code> are in a range of up to 2 steps. But what about that one with the index (0,2):
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-14.gif" alt=""></p>
+    <p>Oops! To get there <code>Ship</code> has to do one extra step. We don’t want this to happen. Fortunately, all we have to do to fix this is to exclude occupied <code>Nodes</code> from consideration for highlighting (as we did already) <em>and</em> from the traversed list:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity {
+      // ... //
+      public FindAndSetInLocomotionRange(range: number): void {
+        // ... //
+    
+        this.Neighbors
+          .filter(neighbor =&gt; !neighbor.Ship) // &lt;--- ADD
+          .map(neighbor =&gt; neighbor.FindAndSetInLocomotionRange(range))
+      }
+    
+    }
+    </code></pre>
+    <p>And now we don’t have this “leftover” anymore:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-15.png" alt=""></p>
+    <p>Finally, let’s get back to one <code>Ship</code> in the fleet, it would be easier for us for a while:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    // ... //
+    export const Settings = Object.freeze({
+      // ... //
+      ships: {
+        fleetSize: 1, // &lt;--- CHANGE
+        // ... //
+      }
+    })
+    </code></pre>
+    <p>Great job! At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-1-16.png" alt=""></p>
+    <blockquote>
+    <p>You can find the complete source code of this post in the <code>movement-pathfinding-2</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>.</p>
+    </blockquote>
+    <hr>
+    <h2>Conclusion</h2>
+    <p>Phew! This was a long article but I hope you enjoyed it! We wrote a lot of code this time and should be proud of ourselves! First, we introduced the notion of “neighbors” of the <code>Node</code>: link to a bordering <code>Nodes</code> which we then used to traverse and highlight all <code>Nodes</code> in a specific, configurable range. We added <code>Ship</code> to the <code>Node</code> so the latter has a chance to know if it's occupied now by any <code>Ship</code>. We use debug tools to display if <code>Node</code> is indeed aware of the presence of the <code>Ship</code>. We also refactored <code>ShipLocomotionComponent</code> to always have a reference to the <code>Node</code>. And finally, introduced the concept of an ”active” <code>Ship</code>.</p>
+    <p>All in all, we have a solid functionality for highlighting the locomotion range. Next time we are going to use these highlighted <code>Nodes</code> to find a path for <code>Ship</code> to move. Time to talk about pathfinding algorithms!</p>
+    <p>I would love to hear your <strong>thoughts</strong>! If you have any <strong>comments</strong>, <strong>suggestions</strong>, <strong>questions</strong>, or any other <strong>feedback</strong>, don’t hesitate to send me a message on <a href="https://twitter.com/GregorySolos">Twitter</a> or <a href="mailto:greg.solo.cv@gmail.com">email</a>!  If you enjoy this series, <strong>please share</strong> it with others. It <strong>really helps</strong> me keep working on it. Thank you for reading, and I’ll see you next time!</p>
+    <p><em>This is Chapter N in the series of tutorials &quot;<strong>Building a game with TypeScript</strong>&quot;. Other Chapters are available here:</em></p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, Part 2, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3<a/>,<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    
+                    </div>
+                </div><!--end col-->
+            </div><!--end row-->
+        </div><!--end container-->
+    </section><!--end section-->
+    <!-- End -->    
+    <section class="section pt-0">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <h4 class="text-shadow-title page-title mb-4">Like this piece? Share it!</h4>
+            <ul class="list-inline list-unstyled">
+              <li class="list-inline-item mr-5">
+                &nbsp;<a class="text-primary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer Start -->
+        <footer class="bg-light py-4">
+            <div class="container text-center">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-sm-8">
+                        <div class="text-sm-start">
+    
+                        </div>
+                    </div>
+                    <!--end col-->
+    
+                    <div class="col-sm-4 mt-4 mt-sm-0">
+                        <ul class="list-unstyled social-icon text-sm-end social mb-0">
+                            <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!--end row-->
+            </div>
+            <!--end container-->
+        </footer>
+        <!--end footer-->
+        <!-- Footer End -->
+    
+        <!-- Back to top -->
+        <a href="#" onclick="topFunction()" id="back-to-top" class="btn btn-icon btn-primary back-to-top"><i
+                class="mdi mdi-arrow-up icons"></i></a>
+        <!-- Back to top -->
+    
+        <!-- Javascript -->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+         <script src="/js/gifffer.js"></script>
+    
+        <!-- Switcher -->
+        <script type="module" src="/js/cookie.min.mjs"></script>
+    
+        <!-- Code highlight -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        
+        <!-- Main Js -->
+        <script type="module" src="/js/switcher.js"></script>
+       
+        <script src="/js/app.js"></script>
+  </body>
+</html>

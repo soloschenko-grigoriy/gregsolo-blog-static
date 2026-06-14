@@ -1,0 +1,42 @@
+/* Template Name: Porfo - Responsive Portfolio Template
+   Author: Shreethemes-studio
+   Email: support@shreethemes.in
+   Website: https://shreethemes.in/
+   Version: 3.0.0
+   Created: August 2020
+   File Description: Main Js file of the template
+*/
+
+/****************************/
+/*         INDEX            */
+/*===========================
+ *     01.  Variables       *
+ *     02.  General         *
+ *     03.  Helper          *
+ *     04.  Bootstrap Custom*
+ *     05.  Components      *
+ *     06.  Menu            *
+ *     07.  Home            *
+ *     08.  Features & Testi*
+ *     09.  Work            *
+ *     10.  CTA             *
+ *     11.  Blog / News     *
+ *     12.  Contact         *
+ *     13.  Footer          *
+ *     14.  Switcher          *
+ ===========================*/
+
+@import "variables";
+@import "general";
+@import "helper";
+@import "bootstrap-custom";
+@import "components";
+@import "menu";
+@import "home";
+@import "features-testi";
+@import "work";
+@import "cta";
+@import "blogs";
+@import "contact";
+@import "footer";
+@import "switcher";

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+            <title>Building a Game With TypeScript. Pathfinding and Movement 4/7. Pathfinder - Greg Solo's Blog</title>
+            <meta name="description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs" />
+            <meta name="keywords" content="Tutorial, TypeScript, javascript, browser APIs, native, canvas, gamedev, game development, game" />
+
+            <meta property="og:title" content="Building a Game With TypeScript. Pathfinding and Movement 4/7. Pathfinder by Greg Solo">
+            <meta property="og:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="og:site_name" content="Greg Solo's Blog">
+            <meta property="og:type" content="article">
+            <meta property="og:url" content="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">
+            <meta property="og:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder.png">
+
+            <meta property="twitter:card" content="summary_large_image">
+            <meta property="twitter:title" content="Building a Game With TypeScript. Pathfinding and Movement 4/7. Pathfinder by Greg Solo">
+            <meta property="twitter:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="twitter:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder.png">
+            <meta property="twitter:site" content="Greg Solo's Blog">
+    
+    <meta content="Greg Solo" name="author" />
+    <meta content="greg.solo.cv@gmail.com" name="mail" />
+    <meta content="https://blog.gregsolo.me" name="website" />
+
+    <!-- favicon -->
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Tobii Lightbox -->
+    <link href="/css/tobii.min.css" rel="stylesheet" type="text/css" />
+    <!-- Slider -->
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <!-- Icons -->
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css">
+    <!-- Main Css -->
+    <link href="/css/style.min.css" rel="stylesheet" type="text/css" id="theme-opt" />
+    <link href="/css/colors/blue.css" rel="stylesheet" id="color-opt">
+    <link href="/css/extra.css" rel="stylesheet">
+    <link href="/css/github-dark-dimmed.css" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KV7Z4BNVS1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-KV7Z4BNVS1');
+    </script>
+</head>
+<html>
+  <body>
+        <!-- Navbar STart -->
+        <header id="topnav" class="defaultscroll sticky">
+            <div class="container">
+                <!-- Logo container-->
+                <ul class="list-unstyled social-icon text-sm-end social mt-3" style="float: left;">
+                    <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i
+                        class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                </ul>
+                <!-- End Logo container-->
+                <div class="menu-extras">
+                    <div class="menu-item">
+                        <!-- Mobile menu toggle-->
+                        <a class="navbar-toggle" id="isToggle" onclick="toggleMenu()">
+                            <div class="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </a>
+                        <!-- End mobile menu toggle-->
+                    </div>
+                </div>
+    
+                <div id="navigation">
+                    <!-- Navigation Menu-->
+                    <ul class="navigation-menu">
+                        <li class="has-submenu parent-menu-item">
+                            <a href="/">All Articles</a>
+                        </li>
+                        <li class="has-submenu parent-menu-item">
+                            <a href="https://gregsolo.me" target="_blank">About me</a>
+                        </li>
+    
+                        <li><a href="https://gregsolo.me/#contact" target="_blank" class="sub-menu-item">Get in Touch</a></li>
+                    </ul>
+                    <!--end navigation menu-->
+                </div>
+                <!--end navigation-->
+            </div>
+            <!--end container-->
+        </header>
+        <!--end header-->
+        <!-- Navbar End -->
+    <section class="section">
+        <div class="container">
+            <div class="row mt-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="title-heading article">
+                            <h1 class="mb-0">Building a Game With TypeScript. Pathfinding and Movement 4/7. Pathfinder</h1>
+                            <p class="text-soft-primary mt-3"><p>Chapter VI in the <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">series</a> of tutorials on how to build a game from scratch with TypeScript and native browser APIs</p></p>
+    
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li class="list-inline-item small font-weight-normal user text-muted me-2"><i class="uil uil-user text-dark"></i> Greg Solo</li>
+                                <li class="list-inline-item small font-weight-normal tag text-muted me-2">
+                                    <a href="/category/gamedev" class="text-muted"><i class="uil uil-tag-alt text-dark"></i> GameDev</a></li>
+                                <li class="list-inline-item small font-weight-normal date text-muted"><i class="uil uil-calendar-alt text-dark"></i> September 04 2022</li>
+                                <li class="list-inline-item small font-weight-normal date text-muted">
+                                    &nbsp;<a target="_blank" class="text-muted" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-47-pathfinder"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+                                </li>
+                            </ul>
+                            <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/Travelers%20standing%20next%20to%20tablet%20with%20map%20on%20screen.jpg" class="img-fluid rounded shadow" style="margin-top: 0;margin-bottom: 0" alt="Building a Game With TypeScript. Pathfinding and Movement 4/7. Pathfinder">
+                            
+                            <p><a href="https://www.freepik.com/vectors/navigation">Navigation vector created by pch.vector - www.freepik.com</a></p>
+    <p>Hey there and welcome back! The time has come for us to build our own Pathfinder. In the last post, we prepared utilities that will help us. Today we're jumping into the algorithms themselves.</p>
+    <p>Just a reminder, I am not going to spend time explaining details of neither Breadth-First search, not A*. The Internet is full of amazing content that goes into every single detail of these widely used techniques. I am going to focus on implementation only.</p>
+    <p>In Chapter VI <em>“Pathfinding and Movement ”</em>, we finally make our Ships alive! You can find other Chapters of this series here:</p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3</a>, Part 4, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    <blockquote>
+    <p>Feel free to switch to the <code>movement-pathfinding-3</code> branch of the <a href="">repository</a>. It contains the working result of the previous posts and is a great starting point for this one.</p>
+    </blockquote>
+    <hr>
+    <h2>Table of Contents</h2>
+    <ol>
+    <li>Introduction</li>
+    <li>Breadth-First search</li>
+    <li>Accounting for cost</li>
+    <li>Adding heuristic</li>
+    <li>Conclusion</li>
+    </ol>
+    <hr>
+    <h2>Breadth-First Search</h2>
+    <p>We start by introducing The <code>pathfinder</code> class. It is constructed for a specific graph and has only one public method: <code>CalculatePath</code>:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    import { IGraph, IGraphNode } from '@/utils'
+    
+    export class Pathfinder {
+      constructor(private readonly _graph: IGraph){}
+    
+      public CalculatePath(from: IGraphNode, to: IGraphNode): IGraphNode[]{
+        const path: IGraphNode[] = []
+    
+        return path
+      }
+    }
+    </code></pre>
+    <p>Simple enough! We construct our Pathfinder with <code>IGraph</code> and then return (so far empty) an array of <code>IGraphNodes</code> from the public <code>CalculatePath</code> method.</p>
+    <p>Out first cut of the pathfinder will be a simple BFS. We'll drop it into a private method to keep our code slightly cleaner:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    // ... //
+    export class Pathfinder {
+      // ... //
+      // --- ADD --- //
+      private GetCameFrom (start: IGraphNode, goal: IGraphNode): Record&lt;string, IGraphNode | null&gt; {
+        const cameFrom: Record&lt;string, IGraphNode | null&gt; = {
+          [start.Position.AsString()]: null
+        }
+    
+        return cameFrom
+      
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>This method returns a dictionary with keys of Node's position and values of either <code>IGraphNode</code> or <code>null</code>. Note, that I am making usage of the native TypeScript <code>Record</code> type which behaves as a dictionary in our case.</p>
+    <p>Let's start with a basic BFS implementation. I'll define &quot;frontier&quot;, add <code>start</code> as a first item of it, and iterate over every neighbor until we reach the end:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    import { IGraph, IGraphNode, PriorityQueue } from '@/utils' // &lt;--- CHANGE
+    // ... //
+    export class Pathfinder {
+      // ... //
+      private GetCameFrom (start: IGraphNode, goal: IGraphNode): Record&lt;string, IGraphNode | null&gt; {
+        const cameFrom: Record&lt;string, IGraphNode | null&gt; = {
+          [start.Position.AsString()]: null
+        }
+        //  --- ADD --- //
+        const frontier = new PriorityQueue&lt;IGraphNode&gt;()
+    
+        frontier.Enqueue(start, 0)
+    
+        while (!frontier.IsEmpty) {
+          const current = frontier.Dequeue()
+    
+          for (const next of this._graph.GetNeighborsOf(current)) {
+            const nextStr = next.Position.AsString()
+            if (typeof cameFrom[nextStr] === 'undefined') {
+              const priority = 0
+              frontier.Enqueue(next, priority)
+              cameFrom[nextStr] = current
+            }
+          }
+        }
+        //  --- ADD --- //
+        
+        return cameFrom
+      }
+    }
+    </code></pre>
+    <p>If you need a refresher on what is going on here, please refer to this <a href="https://www.redblobgames.com/pathfinding/a-star/introduction.html#breadth-first-search">resource</a>. Note that we have to explicitly compare <code>cameFrom[nextStr]</code>to <code>undefined</code> because it can be <code>null</code> and standard check <code>!cameFrom[nextStr]</code> would be insufficient.</p>
+    <p>Now, having a dictionary of <code>cameFrom</code> we can reconstruct the actual path:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    // ... //
+    export class Pathfinder {
+      // ... //
+      public CalculatePath(from: IGraphNode, to: IGraphNode): IGraphNode[]{
+        const path: IGraphNode[] = []
+    
+    	// --- ADD --- //
+        let current: IGraphNode | null = to
+        const cameFrom = this.GetCameFrom(from, to)
+    
+        while (current &amp;&amp; current !== from){
+          path.push(current)
+          current = cameFrom[current.Position.AsString()]
+        }
+    
+        path.reverse()
+    
+        // --- ADD --- //
+        return path
+      }
+    
+    }
+    </code></pre>
+    <p>Let's also add a barrel file so we won't forget to do it:</p>
+    <pre><code class="language-ts">// src/pathfinder/index.ts
+    export * from './pathfinder'
+    </code></pre>
+    <p>And that is the very basic pathfinder! Before we start improving it, let's add some tests first</p>
+    <hr>
+    <h2>Testing Pathfinder</h2>
+    <p>The test we want to conduct sounds easy on the surface: we want to make sure <code>Pathfinder</code> can calculate a path from point A to point B:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      it('should calculate path from point A to point B', () =&gt; {  })
+    })
+    </code></pre>
+    <p>To do that, our <code>Pathfinder</code> needs a Graph, which in turn relies on <code>IGraphNode</code>. Lets mock them:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    import { IGraph, Vector2D, IGraphNode } from '@/utils' // &lt;--- ADD
+    
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // --- ADD --- //
+      class GraphNode implements IGraphNode {
+        public get Position(): Vector2D {
+          return this._position
+        }
+    
+        constructor(private readonly _position: Vector2D){}
+      }
+    
+      class Graph implements IGraph {
+        constructor(private readonly _edges: Record&lt;string, GraphNode[] | null&gt;) {}
+    
+        public GetCost(a: IGraphNode, b: IGraphNode): number {
+          return 1
+        }
+    
+        public GetNeighborsOf(node: GraphNode): GraphNode[] {
+          const neighbors = this._edges[node.Position.AsString()]
+          if (!neighbors) {
+            throw new Error('No neighbors')
+          }
+    
+          return neighbors
+        }
+      }
+      // --- ADD --- //
+    
+      it('should calculate path from point A to point B', () =&gt; {  })
+    })
+    
+    </code></pre>
+    <p><code>GraphNode</code> implements <code>IGraphNode</code> and has to support <code>Position</code>. I will keep it simple and just supply position in the constructor.</p>
+    <p>Similarly, <code>Graph</code> implements <code>IGraph</code> and we will provide all &quot;edges&quot; in the constructor. I made <code>GetCost</code> return 1 for now and <code>GetNeighborsOf</code> simply attempts to find all neighbors of the provided node taking edges as a source of truth.</p>
+    <p>Now we are going to construct a 3x3 &quot;grid&quot; of nodes, similar to the one we have in the actual game. Each node is an instance of <code>GraphNode</code> and the grid itself will be represented by <code>Graph</code>.</p>
+    <p>First node will have the Position <code>(0, 0)</code>, second: <code>(1, 0)</code> and third <code>(2, 0)</code>. Together, they form the first &quot;row&quot; of our grid:</p>
+    <pre><code class="language-ts">//  mantal map
+    (0, 0) | (1, 0) | (2, 0)
+    
+    -----------------------
+    
+    (0, 1) | (1, 1) | (2, 1)
+    
+    -----------------------
+    
+    (0, 2) | (1, 2) | (2, 2)
+    
+    </code></pre>
+    <p>Similarly, nodes with position <code>(0, 1)</code> , <code>(1, 1)</code> and <code>(2, 1)</code> form 2nd row, etc. I'll name variables to hint what their position is:  <code>node01</code> has position <code>(0,1)</code>, <code>node22</code> has position <code>(2,2)</code> and so on</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      class Graph implements IGraph {
+        // ... //
+      }
+      // --- ADD --- //
+      // first row
+      const node00 = new GraphNode(new Vector2D(0, 0))
+      const node10 = new GraphNode(new Vector2D(1, 0))
+      const node20 = new GraphNode(new Vector2D(2, 0))
+    
+      // second row
+      const node01 = new GraphNode(new Vector2D(0, 1))
+      const node11 = new GraphNode(new Vector2D(1, 1))
+      const node21 = new GraphNode(new Vector2D(2, 1))
+    
+      // third row
+      const node02 = new GraphNode(new Vector2D(0, 2))
+      const node12 = new GraphNode(new Vector2D(1, 2))
+      const node22 = new GraphNode(new Vector2D(2, 2))
+      // --- ADD --- //
+      
+      it('should calculate path from point A to point B', () =&gt; {  })
+    })
+    </code></pre>
+    <p>And now we can define &quot;edges&quot;. These are simply dictionaries with the key being a string representation of the position of each node and the value being an array of all neighbors of that node :</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      const node22 = new GraphNode(new Vector2D(2, 2))
+      
+      // --- ADD --- //
+      const edges = {
+        [node00.Position.AsString()]: [node10, node01],
+        [node10.Position.AsString()]: [node00, node20, node11],
+        [node20.Position.AsString()]: [node10, node21],
+    
+        [node01.Position.AsString()]: [node00, node11, node02],
+        [node11.Position.AsString()]: [node10, node01, node21, node12],
+        [node21.Position.AsString()]: [node20, node11, node22],
+    
+        [node02.Position.AsString()]: [node01, node12],
+        [node12.Position.AsString()]: [node02, node11, node22],
+        [node22.Position.AsString()]: [node21, node12],
+      }
+      // --- ADD --- //
+    
+      it('should calculate path from point A to point B', () =&gt; {  })
+    })
+    </code></pre>
+    <p>This gives us the opportunity to define a <code>Graph</code> and feed it to <code>Pathfinder</code>:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    import { Pathfinder } from './pathfinder' // &lt;--- ADD 
+    
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      const graph = new Graph(edges) // &lt;--- ADD 
+      const pathfinder = new Pathfinder(graph) // &lt;--- ADD 
+    
+      it('should calculate path from point A to point B', () =&gt; {  })
+    })
+    </code></pre>
+    <p>Now the test itself. Assuming we're looking to find a path between (0, 0) and (2, 2), what can it be?</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      it('should calculate path from point A to point B', () =&gt; {  
+        // --- ADD --- //
+        expect(pathfinder.CalculatePath(node00, node22)).toStrictEqual([
+    
+        ])
+        // --- ADD --- //
+      })
+    })
+    </code></pre>
+    <p>Let's take a look at our little grid again:</p>
+    <pre><code class="language-ts">//  mantal map
+    
+    (0, 0) | (1, 0) | (2, 0)
+    
+    -----------------------
+    
+    (0, 1) | (1, 1) | (2, 1)
+    
+    -----------------------
+    
+    (0, 2) | (1, 2) | (2, 2)
+    
+    </code></pre>
+    <p>There are few ways we can get from (0, 0) to (2, 2). For example, it can be the path:
+    (0, 0) -&gt; (1, 0) -&gt; (2, 0) -&gt; (2, 1) -&gt; (2,2)</p>
+    <p>It can also be:
+    (0, 0) -&gt; (0, 1) -&gt; (0, 2) -&gt; (1, 2) -&gt; (2, 2)</p>
+    <p>And quite a few other options are also possible. To figure out which one our <code>Pathfinder</code> will choose we have to take a look at how we set up our neighbors. We added them starting with the most &quot;left&quot; one and then moving clockwise: Left -&gt; Top -&gt; Right -&gt; Bottom. This means <code>Pathfinder</code> will prioritize neighbors in that order.</p>
+    <p>Hence, its safe to assume it will suggest the path (0, 0) -&gt; (1, 0) -&gt; (2, 0) -&gt; (2, 1) -&gt; (2,2).</p>
+    <p>Since starting position should not be included, the expectation is to have the path:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      it('should calculate path from point A to point B', () =&gt; {  
+        expect(pathfinder.CalculatePath(node00, node22)).toStrictEqual([
+          node10, node20, node21, node22 // &lt;--- ADD
+        ])
+      })
+    })
+    </code></pre>
+    <p>``
+    And it works! If you run <code>npm t</code> you should see your test pass. Let's add a few more cases to be safe:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      it('should calculate path from point A to point B', () =&gt; {  
+        expect(pathfinder.CalculatePath(node00, node22)).toStrictEqual([
+          node10, node20, node21, node22 // &lt;--- ADD
+        ])
+    	// --- ADD --- //
+        expect(pathfinder.CalculatePath(node01, node12)).toStrictEqual([
+          node11, node12
+        ])
+    
+        expect(pathfinder.CalculatePath(node20, node02)).toStrictEqual([
+          node10, node00, node01, node02
+        ])
+        // --- ADD --- //
+      })
+    })
+    </code></pre>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/Path-4-0.png" alt=""></p>
+    <hr>
+    <h2>Accounting for cost</h2>
+    <p>Now with basic implementation in place, we can improve our algorithm. First, let's add a movement cost:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    // ... //
+    export class Pathfinder {
+      // ... //
+      private GetCameFrom (start: IGraphNode, goal: IGraphNode): Record&lt;string, IGraphNode | null&gt; {
+        const cameFrom: Record&lt;string, IGraphNode | null&gt; = {
+          [start.Position.AsString()]: null
+        }
+        // --- ADD --- //
+        const costSoFar: Record&lt;string, number&gt; = {
+          [start.Position.AsString()]: 0
+        }
+    	// --- ADD --- //
+    	
+        const frontier = new PriorityQueue&lt;IGraphNode&gt;()
+    
+        frontier.Enqueue(start, 0)
+    
+        while (!frontier.IsEmpty) {
+          const current = frontier.Dequeue()
+    
+          for (const next of this._graph.GetNeighborsOf(current)) {
+          const newCost = costSoFar[current.Position.AsString()] + this._graph.GetCost(current, next) // &lt;--- ADD
+            const nextStr = next.Position.AsString()
+            if (typeof costSoFar[nextStr] === 'undefined' || newCost &lt; costSoFar[nextStr]){ // &lt;--- CHANGE
+              const priority = newCost // &lt;--- CHANGE
+              costSoFar[nextStr] = newCost // &lt;--- ADD
+              frontier.Enqueue(next, priority)
+              cameFrom[nextStr] = current
+            }
+          }
+        }
+    
+        return cameFrom
+      }
+    }
+    
+    </code></pre>
+    <p>Having cost will make our pathfinder slightly smarter and allow it to prioritize the least expensive paths.</p>
+    <p>No surprise our test still passes: <code>GetCost</code> of fake <code>Graph</code> always returns the same value which means all paths are equal. Let's make it a bit more interesting.</p>
+    <p>Remember our first test? The one that verifies that Pathfinder would choose (0, 0) -&gt; (1, 0) -&gt; (2, 0) -&gt; (2, 1) -&gt; (2,2) to get from (0, 0)  to  (2,2)?</p>
+    <pre><code class="language-ts">//  mantal map
+    
+    (0, 0) | (1, 0) | (2, 0)
+    
+    -----------------------
+    
+    (0, 1) | (1, 1) | (2, 1)
+    
+    -----------------------
+    
+    (0, 2) | (1, 2) | (2, 2)
+    
+    </code></pre>
+    <p>Imagine now, that passing from (1,0) to (2,0) is more expensive than 1. That way, pathfinder has to consider another option, probably this one:
+    (0, 0) -&gt; (1, 0) -&gt; (1, 1) -&gt; (2, 1) -&gt; (2,2)</p>
+    <p>To test that we first need to adjust <code>GetCost</code>:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      class Graph implements IGraph {
+        // ... //
+        public GetCost(a: IGraphNode, b: IGraphNode): number {
+          // --- ADD --- //
+          if(a.Position.x === 1 &amp;&amp; a.Position.y === 0 &amp;&amp; b.Position.x === 2 &amp;&amp; a.Position.y === 0){
+            return 2
+          }
+          // --- ADD --- //
+          
+          return 1
+        }
+      }
+      // ... //
+    })
+    </code></pre>
+    <p>I simply compare the position of the first and second nodes and make sure if these nodes are (1, 0) and (2,0) respectively, the cost of crossing between them would be 2 instead of 1.</p>
+    <p>Also, we need to update our expectations. Now  <code>Pathfinder</code> would prefer to avoid crossing form (1, 0) to (2,0) so it will choose (1, 0) -&gt; (1, 1) instead:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      it('should calculate path from point A to point B', () =&gt; {
+        expect(pathfinder.CalculatePath(node00, node22)).toStrictEqual([
+          node10, node11, node21, node22 // &lt;--- CHANGE
+        ])
+    
+        // ... //
+       })
+    })
+    </code></pre>
+    <p>Woohoo! Tests are passing and now we are sure to cost is being accounted for by <code>Pathfinder</code>.</p>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/Path-4-0.png" alt=""></p>
+    <hr>
+    <h2>Adding heuristics</h2>
+    <p>By the end of the day, heuristics is just a function that nudges our pathfinding algorithm to be more efficient. Pretty much, it should help it understand where the &quot;goal&quot; may be relative to any other node.</p>
+    <p>For example, for our fake grid, the heuristic can be defined as a distance between two nodes:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+      const heuristic = (a: IGraphNode, b: IGraphNode): number =&gt; Math.abs(a.Position.x - b.Position.x) + Math.abs(a.Position.y - b.Position.y) // &lt;--- ADD
+      const graph = new Graph(edges)
+      const pathfinder = new Pathfinder(graph)
+      // ... //
+    })
+    </code></pre>
+    <p>Since <code>heuristic</code> depends on how the graph is set up, I'll make it read-only property as well:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    // ... //
+    export class Pathfinder {
+      constructor(
+        private readonly _graph: IGraph,
+        private readonly _heuristic: (a: IGraphNode, b: IGraphNode) =&gt; number // &lt;--- ADD
+      ){}
+    </code></pre>
+    <p>And now we can add it to the tests:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Pathfinder', () =&gt; {
+      // ... //
+       const heuristic = (a: IGraphNode, b: IGraphNode): number =&gt; Math.abs(a.Position.x - b.Position.x) + Math.abs(a.Position.y - b.Position.y)
+      const graph = new Graph(edges)
+      const pathfinder = new Pathfinder(graph, heuristic) // &lt;--- CHANGE
+      // ... //
+    })
+    </code></pre>
+    <p>And all we have to do is use it in our priority calculations:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    // ... //
+    export class Pathfinder {
+      // ... //
+      private GetCameFrom (start: IGraphNode, goal: IGraphNode): Record&lt;string, IGraphNode | null&gt; {
+        // ... //
+        while (!frontier.IsEmpty) {
+          const current = frontier.Dequeue()
+    
+          for (const next of this._graph.GetNeighborsOf(current)) {
+            const newCost = costSoFar[current.Position.AsString()] + this._graph.GetCost(current, next)
+            const nextStr = next.Position.AsString()
+            if (typeof costSoFar[nextStr]  === 'undefined' || newCost &lt; costSoFar[nextStr]){
+              const priority = newCost + this._heuristic(goal, next) // &lt;--- CHANGE
+              costSoFar[nextStr] = newCost
+              frontier.Enqueue(next, priority)
+              cameFrom[nextStr] = current
+            }
+          }
+        }
+      }
+    }
+    </code></pre>
+    <p>And also, we can add &quot;early exit&quot;: when we know we have reached the destination, there is no need for us to keep iterating:</p>
+    <pre><code class="language-ts">// src/pathfinder/pathfinder.ts
+    // ... //
+    export class Pathfinder {
+      // ... //
+      private GetCameFrom (start: IGraphNode, goal: IGraphNode): Record&lt;string, IGraphNode | null&gt; {
+        // ... //
+        while (!frontier.IsEmpty) {
+          const current = frontier.Dequeue()
+    
+    	  //  --- ADD --- //
+    	  if(current === goal){
+            break
+          }
+          //  --- ADD --- //
+          // ... //
+        }
+      }
+    }
+    
+    </code></pre>
+    <p>And that's it! We have built ourselves A* pathfinder! At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/Path-4-0.png" alt=""></p>
+    <blockquote>
+    <p>You can find the complete source code of this post in the <code>movement-pathfinding-4</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>.</p>
+    </blockquote>
+    <hr>
+    <h2>Conclusion</h2>
+    <p>Awesome job! It was not an easy installment but you did it! You prepared your very-own implementation of Pathfinder. We will continue on this in the next article: we are going to apply this algorithm to our <code>Grid</code>. We also are going to add one more debug tool to illustrate the path and make sure it works correctly. Cannot wait to see you then!</p>
+    <p>I would love to hear your <strong>thoughts</strong>! If you have any <strong>comments</strong>, <strong>suggestions</strong>, <strong>questions</strong>, or any other <strong>feedback</strong>, don’t hesitate to send me a message on <a href="https://twitter.com/GregorySolos">Twitter</a> or <a href="mailto:greg.solo.cv@gmail.com">email</a>!  If you enjoy this series, <strong>please share</strong> it with others. It <strong>really helps</strong> me keep working on it. Thank you for reading, and I’ll see you next time!</p>
+    <p><em>This is Chapter N in the series of tutorials &quot;<strong>Building a game with TypeScript</strong>&quot;. Other Chapters are available here:</em></p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3</a>, Part 4, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    
+                    </div>
+                </div><!--end col-->
+            </div><!--end row-->
+        </div><!--end container-->
+    </section><!--end section-->
+    <!-- End -->    
+    <section class="section pt-0">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <h4 class="text-shadow-title page-title mb-4">Like this piece? Share it!</h4>
+            <ul class="list-inline list-unstyled">
+              <li class="list-inline-item mr-5">
+                &nbsp;<a class="text-primary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-47-pathfinder"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer Start -->
+        <footer class="bg-light py-4">
+            <div class="container text-center">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-sm-8">
+                        <div class="text-sm-start">
+    
+                        </div>
+                    </div>
+                    <!--end col-->
+    
+                    <div class="col-sm-4 mt-4 mt-sm-0">
+                        <ul class="list-unstyled social-icon text-sm-end social mb-0">
+                            <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!--end row-->
+            </div>
+            <!--end container-->
+        </footer>
+        <!--end footer-->
+        <!-- Footer End -->
+    
+        <!-- Back to top -->
+        <a href="#" onclick="topFunction()" id="back-to-top" class="btn btn-icon btn-primary back-to-top"><i
+                class="mdi mdi-arrow-up icons"></i></a>
+        <!-- Back to top -->
+    
+        <!-- Javascript -->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+         <script src="/js/gifffer.js"></script>
+    
+        <!-- Switcher -->
+        <script type="module" src="/js/cookie.min.mjs"></script>
+    
+        <!-- Code highlight -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        
+        <!-- Main Js -->
+        <script type="module" src="/js/switcher.js"></script>
+       
+        <script src="/js/app.js"></script>
+  </body>
+</html>

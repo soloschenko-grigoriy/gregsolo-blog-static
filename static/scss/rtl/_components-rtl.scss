@@ -1,0 +1,59 @@
+//
+// components.scss
+//
+
+//back to top and Shape
+.home-shape-arrow {
+    right: 0 !important;
+    left: auto !important;
+}
+
+//back to top
+.back-to-top {
+    left: 20px !important;
+    right: auto;
+
+    @media (max-width: 425px) {
+        left: 10px !important;
+        right: auto;
+    }
+}
+
+//Testimonial
+.tns-inner, .tns-nav {
+    direction: ltr;
+}
+
+.tns-visually-hidden {
+    left: 0 !important;
+    visibility: hidden;
+}
+
+//
+// work.scss
+//
+.container-filter {
+    .categories {
+        &.active,
+        &:hover {
+            &:after {
+                right: 0 !important;
+                left: auto;
+            }
+        }
+    }
+}
+
+.work-container {
+    &.work-modern {
+        .content {
+            right: 5% !important;
+            left: auto;
+        }
+        .client, 
+        .read_more {
+            left: 5% !important;
+            right: auto;
+        }
+    }
+}

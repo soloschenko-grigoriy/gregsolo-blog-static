@@ -1,0 +1,177 @@
+//
+// menu.scss
+//
+#topnav {
+    .logo {
+        color: $dark !important;
+    }
+    .has-submenu {
+        &.active {
+            a {
+                color: $white;
+            }
+        }
+    }
+    .has-submenu{
+        .submenu {
+            .submenu-arrow {
+                border: solid $dark;
+            }
+        }
+    }
+    .navbar-toggle {
+        span {
+            background-color: $dark;
+        }
+    }
+  
+    .navigation-menu {
+        > li {
+            > a {
+                color: lighten($dark, 5%);
+            }
+        }
+        .has-submenu {
+            .menu-arrow {
+                border: solid lighten($dark, 5%);
+            }
+        }
+    }
+    
+    &.scroll {
+        background-color: $white;
+        box-shadow: $shadow;
+        .navigation-menu {
+            > li {
+                > a{
+                    color: $dark;
+                }
+                
+                > .menu-arrow {
+                    border-color: lighten($dark, 5%);
+                }
+            } 
+        }
+    }
+    
+    &.nav-sticky{
+        background: $white;
+        box-shadow: $shadow;
+        .navigation-menu {
+            &.nav-light {
+                > li {
+                    > a {
+                        color: $dark;
+                    }
+                } 
+                .has-submenu {
+                    .menu-arrow {
+                        border-color: lighten($dark, 5%);
+                    }
+                }
+            }
+        }
+    }
+}
+@media (min-width: 992px) {
+    #topnav {
+        .navigation-menu {
+            > .has-submenu {
+                > .submenu {
+                    > .has-submenu {
+                        > .submenu {
+                            &::before{
+                                box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 0.15);
+                                border-color: transparent $white $white transparent;
+                            }
+                        }
+                    } 
+                }
+            } 
+            > li {
+                .submenu {
+                    background-color: $white;
+                    box-shadow: $shadow-lg;
+                }
+                .submenu {
+                    li {
+                        a {
+                            color: lighten($dark, 5%) !important;
+                        }
+                    }
+                }
+            }
+            &.nav-light {
+                > li {
+                    > a {
+                        color: rgba($white, 0.6);
+                    }   
+                    &.active {
+                        > a {
+                            color: $white !important;
+                        }      
+                    }           
+                    &:hover {
+                        > .menu-arrow {
+                            border-color: $white !important;
+                        }
+                        > a {
+                            color: $white !important;
+                        }
+                    }
+                } 
+                .has-submenu {
+                    .menu-arrow {
+                        border-color: rgba($white, 0.6);
+                    }
+                    &.active {
+                        .menu-arrow{
+                            border-color: $white !important;
+                        }
+                    }
+                }
+            } 
+        }        
+    }
+}
+  
+@media (max-width: 991px) {
+    #topnav {
+        background-color: $white;
+        box-shadow: $shadow;
+        .navigation-menu {
+            > li {
+                .submenu {
+                    li {
+                        a {
+                            color: lighten($dark, 5%) !important;
+                        }
+                    }
+                    &.megamenu {
+                        > li {
+                            > ul {
+                                > li {
+                                    > span {
+                                        color: $muted;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                > a {
+                    color: $dark;
+                }
+            }
+        }
+        .menu-extras .menu-item {
+            border-color: $muted;
+        }
+    }
+
+    #navigation {
+        border-top: 1px solid darken($light,2%);
+        border-bottom: 1px solid darken($light,2%);
+        background-color: $white;
+    }
+}

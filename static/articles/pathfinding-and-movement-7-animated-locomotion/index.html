@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+            <title>Pathfinding and Movement 7. Animated Locomotion - Greg Solo's Blog</title>
+            <meta name="description" content="In this installment, we are to wrap things up by implementing the animated movement. Let&#x27;s dive in!" />
+            <meta name="keywords" content="tutorial, game, gamedev, TypeScript, native browser APIs, canvas, pathfinder, animation" />
+
+            <meta property="og:title" content="Pathfinding and Movement 7. Animated Locomotion by Greg Solo">
+            <meta property="og:description" content="In this installment, we are to wrap things up by implementing the animated movement. Let&#x27;s dive in!">
+            <meta property="og:site_name" content="Greg Solo's Blog">
+            <meta property="og:type" content="article">
+            <meta property="og:url" content="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">
+            <meta property="og:image" content="https://blog.gregsolo.me/uploads/og_coming-soon-pathfinding-and-movement-7-animated-locomotion.png">
+
+            <meta property="twitter:card" content="summary_large_image">
+            <meta property="twitter:title" content="Pathfinding and Movement 7. Animated Locomotion by Greg Solo">
+            <meta property="twitter:description" content="In this installment, we are to wrap things up by implementing the animated movement. Let&#x27;s dive in!">
+            <meta property="twitter:image" content="https://blog.gregsolo.me/uploads/og_coming-soon-pathfinding-and-movement-7-animated-locomotion.png">
+            <meta property="twitter:site" content="Greg Solo's Blog">
+    
+    <meta content="Greg Solo" name="author" />
+    <meta content="greg.solo.cv@gmail.com" name="mail" />
+    <meta content="https://blog.gregsolo.me" name="website" />
+
+    <!-- favicon -->
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Tobii Lightbox -->
+    <link href="/css/tobii.min.css" rel="stylesheet" type="text/css" />
+    <!-- Slider -->
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <!-- Icons -->
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css">
+    <!-- Main Css -->
+    <link href="/css/style.min.css" rel="stylesheet" type="text/css" id="theme-opt" />
+    <link href="/css/colors/blue.css" rel="stylesheet" id="color-opt">
+    <link href="/css/extra.css" rel="stylesheet">
+    <link href="/css/github-dark-dimmed.css" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KV7Z4BNVS1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-KV7Z4BNVS1');
+    </script>
+</head>
+<html>
+  <body>
+        <!-- Navbar STart -->
+        <header id="topnav" class="defaultscroll sticky">
+            <div class="container">
+                <!-- Logo container-->
+                <ul class="list-unstyled social-icon text-sm-end social mt-3" style="float: left;">
+                    <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i
+                        class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                </ul>
+                <!-- End Logo container-->
+                <div class="menu-extras">
+                    <div class="menu-item">
+                        <!-- Mobile menu toggle-->
+                        <a class="navbar-toggle" id="isToggle" onclick="toggleMenu()">
+                            <div class="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </a>
+                        <!-- End mobile menu toggle-->
+                    </div>
+                </div>
+    
+                <div id="navigation">
+                    <!-- Navigation Menu-->
+                    <ul class="navigation-menu">
+                        <li class="has-submenu parent-menu-item">
+                            <a href="/">All Articles</a>
+                        </li>
+                        <li class="has-submenu parent-menu-item">
+                            <a href="https://gregsolo.me" target="_blank">About me</a>
+                        </li>
+    
+                        <li><a href="https://gregsolo.me/#contact" target="_blank" class="sub-menu-item">Get in Touch</a></li>
+                    </ul>
+                    <!--end navigation menu-->
+                </div>
+                <!--end navigation-->
+            </div>
+            <!--end container-->
+        </header>
+        <!--end header-->
+        <!-- Navbar End -->
+    <section class="section">
+        <div class="container">
+            <div class="row mt-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="title-heading article">
+                            <h1 class="mb-0">Pathfinding and Movement 7. Animated Locomotion</h1>
+                            <p class="text-soft-primary mt-3"><p>Chapter VI in the <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">series</a> of tutorials on how to build a game from scratch with TypeScript and native browser APIs</p></p>
+    
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li class="list-inline-item small font-weight-normal user text-muted me-2"><i class="uil uil-user text-dark"></i> Greg Solo</li>
+                                <li class="list-inline-item small font-weight-normal tag text-muted me-2">
+                                    <a href="/category/gamedev" class="text-muted"><i class="uil uil-tag-alt text-dark"></i> GameDev</a></li>
+                                <li class="list-inline-item small font-weight-normal date text-muted"><i class="uil uil-calendar-alt text-dark"></i> February 13 2023</li>
+                                <li class="list-inline-item small font-weight-normal date text-muted">
+                                    &nbsp;<a target="_blank" class="text-muted" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fpathfinding-and-movement-7-animated-locomotion"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+                                </li>
+                            </ul>
+                            <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7.9.jpg" class="img-fluid rounded shadow" style="margin-top: 0;margin-bottom: 0" alt="Pathfinding and Movement 7. Animated Locomotion">
+                            
+                            <p><a href="https://www.freepik.com/free-vector/cute-astronaut-riding-jet-ski-cartoon-vector-icon-illustration-science-transportation-isolated-flat_34737589.htm#page=2&query=ship&position=16&from_view=search&track=sph">Image by catalyststuff on Freepik</a></p>
+    <p>Hello friends! Here we are, the final episode of Chapter VI! It was a long trip through the woods of algorithms of pathfinding, graphs, and queues. In this installment, we are to wrap things up by implementing the animated movement. Let's dive in!</p>
+    <hr>
+    <p>In Chapter VI <em>“Pathfinding and Movement ”</em>, we finally make our Ships alive! You can find other Chapters of this series here:</p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, Part 7)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    <blockquote>
+    <p>Feel free to switch to the <code>movement-pathfinding-6</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>. It contains the working result of the previous posts and is a great starting point for this one.</p>
+    </blockquote>
+    <hr>
+    <h2>Table of Contents</h2>
+    <ol>
+    <li>Introduction</li>
+    <li>Animated Locomotion</li>
+    <li>Lerp</li>
+    <li>Intro Animated Locomotion Component</li>
+    <li>Intro Current Position</li>
+    <li>Moving slowly</li>
+    <li>Setting things in (loco)motion</li>
+    <li>Calling OnMoveCompleted once</li>
+    <li>Setting Ship before Animation Completes</li>
+    <li>Conclusion</li>
+    </ol>
+    <hr>
+    <h2>Animated Locomotion</h2>
+    <p>At its core, animated locomotion adheres to the same rules as an instant one. It changes <code>Ship's</code> position over time, stepping at every <code>Node</code> on its path. In the end, it has to reach its destination, and that destination has to be the last <code>Node</code> on the <code>_path</code>.</p>
+    <p>There are differences, of course. While instant locomotion arrives immediately at the center of the &quot;next&quot; <code>Node</code>, animated one smoothes this process. It progressively changes the location of the <code>Ship</code> even between <code>Nodes</code>:</p>
+    <p><img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_0.gif" alt=""></p>
+    <p>We don't have to &quot;store&quot; this position in between <code>Nodes</code> long term since it doesn't bear any meaning for the game, it's pure aesthetics. But we do have to keep it in mind to make the animation possible.</p>
+    <p>One way of achieving this is by &quot;lerping&quot; between nodes. Lerp, or <a href="https://en.wikipedia.org/wiki/Linear_interpolation">linear interpolation</a>, in its simplest form, is a function that, having two data points, returns you a value in between these points based on a given third parameter.</p>
+    <p>How is that helpful to us? Consider the mentioned data points as <code>Ship's</code> position: &quot;current&quot; <code>Node</code> and &quot;next&quot; <code>Node</code>. At any point of animated movement, we expect <code>Ship</code> to be somewhere in between these two points. Where exactly depends on how much time passed since <code>Ship</code> started its movement and the speed of this movement.</p>
+    <p>Of course, to make this happen we need someone to calculate linear interpolation for us. Time to write some code!</p>
+    <hr>
+    <h2>Lerp</h2>
+    <p>This is a generic functionality, not in any way dependent on our game logic. So, its only natural to put it into the <code>utils</code> folder:</p>
+    <pre><code class="language-ts">// src/utils/lerp/lerp.ts
+    export const Lerp = (start: number, end: number, t: number): number =&gt; {}
+    </code></pre>
+    <p>And do not forget to update the barrel files. Here:</p>
+    <pre><code class="language-ts">// src/utils/lerp/index.ts
+    export * from './lerp'
+    </code></pre>
+    <p>And here:</p>
+    <pre><code class="language-ts">// src/utils/index.ts
+    // ... //
+    export * from './graph'
+    export * from './lerp' // &lt;--- ADD
+    export * from './lifecycle'
+    // ... //
+    </code></pre>
+    <p>Our <code>Lerp</code>  expects 3 numeric values: <code>start</code>, <code>end</code>, and <code>t</code>. The last one determines the value the function will return between <code>start</code> and <code>end</code>.</p>
+    <p>I am going to take formula from the <a href="https://en.wikipedia.org/wiki/Linear_interpolation">wikipedia</a>, please refer to that article if you're interested in the math behind it:</p>
+    <pre><code class="language-ts">// src/utils/lerp/lerp.ts
+    export const Lerp = (start: number, end: number, t: number): number =&gt; {
+      return start * (1 - t) + end * t // &lt;--- ADD
+    }
+    </code></pre>
+    <p>And we can easily test it:</p>
+    <pre><code class="language-ts">// src/utils/lerp/lerp.spec.ts
+    import { Lerp } from './lerp'
+    
+    describe('&gt;&gt;&gt; Lerp', () =&gt; {
+      it('should linearly interpolate between two values', () =&gt; {
+    
+      })
+    })
+    
+    </code></pre>
+    <p>For example, imagine <code>start</code> is 0, <code>end</code> is 50. Given <code>t</code> is 0.5 (right in the middle of these two) the result should be 25:</p>
+    <pre><code class="language-ts">// src/utils/lerp/lerp.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Lerp', () =&gt; {
+      it('should linearly interpolate between two values', () =&gt; {
+        expect(Lerp(0, 50, 0.5)).toBe(25) // &lt;--- ADD
+      })
+    })
+    </code></pre>
+    <p>Or, given <code>start</code> is 20, <code>end</code> is 80 and <code>t</code> is 0 then the output has to be the very &quot;start&quot;:</p>
+    <pre><code class="language-ts">// src/utils/lerp/lerp.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Lerp', () =&gt; {
+      it('should linearly interpolate between two values', () =&gt; {
+        expect(Lerp(0, 50, 0.5)).toBe(25)
+        expect(Lerp(20, 80, 0)).toBe(20) // &lt;--- ADD
+      })
+    })
+    </code></pre>
+    <p>And it works:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_1.png" alt=""></p>
+    <p>Good! But since <code>Ship's</code> position defined as <code>Vector2D</code> it will also be helpful to have a vector representation of lerp. That is, given two <code>Vector2D</code> values, find another <code>Vector2D</code> in between them based on some value <code>t</code>.</p>
+    <p>There is no better place to store this functionality than <code>Vector2D</code> class. The method is static, however, since we supply values directly to the method, and do not depend on any particular instance of Vector2D:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.ts
+    export class Vector2D {
+      // ... //
+      public static Lerp(start: Vector2D, end: Vector2D, t: number): Vector2D {
+    
+      }
+    }
+    </code></pre>
+    <p>Interpolation is quite easy to achieve. All we have to do is to interpolate every element of the vector independently and construct a new one:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.ts
+    import { Lerp } from '@/utils' // &lt;--- ADD
+    
+    export class Vector2D {
+      // ... //
+      public static Lerp(start: Vector2D, end: Vector2D, t: number): Vector2D {
+        return new Vector2D(Lerp(start.x, end.x, t), Lerp(start.y, end.y, t)) // &lt;--- ADD
+      }
+    }
+    </code></pre>
+    <p>With this out of our way, we can focus on the locomotion itself.</p>
+    <hr>
+    <h2>Intro Animated Locomotion Component</h2>
+    <p>As we discussed above, Animated Locomotion is very close at its heart to the Instant locomotion we have already built. Moreover, we can envision &quot;Animated&quot; version as an extended, more specialized case of locomotion. In Object-Oriented programming there are some tools that can help us model this kind of relationship: inheritance and polymorphism.</p>
+    <p>Indeed, we can reuse structure and some logic from the <code>LocomotionComponent</code> and add new stuff on top of it, by simply adding derived class: <code>ShipLocomotionAnimatedComponent</code>:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    import { ShipLocomotionComponent } from './locomotion'
+    
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {}
+    
+    </code></pre>
+    <p>And re-export it:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/index.ts
+    export * from './locomotion'
+    export * from './locomotion-animated' // &lt;--- ADD
+    </code></pre>
+    <p>And then use it in place of a parent class:</p>
+    <pre><code class="language-ts">// src/ship/ship.ts
+    // ... //
+    import { Fleet } from '@/fleet'
+    import {
+      ShipDrawComponent,
+      ShipLocomotionComponent,
+      ShipLocomotionAnimatedComponent // &lt;--- ADD
+    } from './components'
+    import { Node } from '@/node'
+    // ... //
+    export class Ship extends Entity {
+      // ... //
+      constructor(public readonly Factory: Fleet, node: Node) {
+        super()
+    
+        this._locomotionComponent = new ShipLocomotionAnimatedComponent(node) // &lt;--- CHANGE
+      }
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>TypeScript peacefully accepted us instantiating  <code>ShipLocomotionAnimatedComponent</code> instead of <code>ShipLocomotionComponent</code> even though <code>_locomotionComponent</code> is of a latter type. No surprise here, the animation component derives from the regular locomotion component and hence is compatible with it. Moreover, <code>Ship</code> doesn't really care which version we're using so we could potentially swap between these two implementations. Nice!</p>
+    <p>If you open the browser, you notice nothing has changed. The game behaves exactly as it used to. Since <code>ShipLocomotionAnimatedComponent</code> has no custom implementation, it's effectively a shallow proxy to the parent class. Even tests are passing but just to be precise, let's groom them a bit:</p>
+    <pre><code class="language-ts">// src/ship/ship.spec.ts
+    import {
+      Ship,
+      mockShipFactory,
+      ShipDrawComponent,
+      ShipLocomotionAnimatedComponent // &lt;--- CHANGE
+    } from '@/ship'
+    
+    describe('&gt;&gt;&gt; Ship', () =&gt; {
+      it('should awake and update all Components', () =&gt; {
+        // ... //
+        // --- CHANGE --- //
+        const spyLocomotionCompAwake = jest.spyOn(ShipLocomotionAnimatedComponent.prototype, 'Awake')
+        const spyLocomotionCompUpdate = jest.spyOn(ShipLocomotionAnimatedComponent.prototype, 'Update')
+        // --- CHANGE --- //
+        // ... //
+      })
+    })
+    </code></pre>
+    <p>Simply swap the component we're spying on. Code should still compile, all tests should still pass:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_2.png" alt=""></p>
+    <hr>
+    <h2>Intro Current Position</h2>
+    <p>Let's dissect the task at hand. Animated movement means we need to find a way to slowly change the <code> position</code> of the <code>Ship</code> on the canvas. Until now, we treated <code>position</code> and <code>Node</code> Ship stands on, pretty much interchangeably. Indeed, look at our <code>Position</code> getter, it virtually returns the center of the current <code>Node</code>.</p>
+    <p>Now, with animated movement that's no longer true. The actual, physical position of the <code>Ship</code> can be anywhere between <code>Nodes</code> even though <code>Ship</code> still &quot;belongs&quot; to one <code>Node</code> or another.</p>
+    <p>This means we need to separate these two concepts. And we can do that by introducing a dedicated field:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    import { Vector2D } from '@/utils' // &lt;--- ADD
+    import { ShipLocomotionComponent } from './locomotion'
+    
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      private _currentPosition: Vector2D // &lt;--- ADD
+    }
+    </code></pre>
+    <p>Moreover, we have to use this field when we want to draw or clean up <code>Ship</code>.  <code>ShipDrawComponent</code> references Ship's <code>Position</code> property for that, so we have no choice but to override it:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      private _currentPosition: Vector2D
+    
+      // --- ADD --- //
+      public get Position(): Vector2D {
+        return this._currentPosition
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>This seems to have broken our game. <code>ShipDrawComponent</code> now screams that there is no position at all. It is right to complain, we never set <code>_currentPosition</code> which in the JavaScript world means its value is <code>undefined</code>.</p>
+    <p>We must apply some value from the very start. What the value should be? The current node's center, of course! There was never any movement happened yet but <code>Ship</code> always starts its existence on some <code>Node</code>:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    import { Vector2D } from '@/utils'
+    import { Node } from '@/node' // &lt;--- ADD
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      // --- ADD --- //
+      constructor(node: Node) {
+        super(node)
+        this._currentPosition = node.Center
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>That seems to have fixed the issue. However, you may notice that <code>Ship</code> now behaves oddly:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_1.gif" alt=""></p>
+    <p>This is exactly what we were looking to achieve, actually! <code>Ship</code> keeps occupying and moving along the <code>Nodes</code>, which we can verify by looking at the &quot;Ship&quot; debug message. But the &quot;visual&quot; location is now detached from that. It never changes because, well... we never updated <code>_currentPosition</code>. Let's do that!</p>
+    <hr>
+    <h2>Moving slowly</h2>
+    <p>The meat and bone of the locomotion happen in <code>Update</code>, where we change the position of the <code>Ship</code> over time when a new iteration of the game loop happens. Naturally, this is the place we need to override! We can start by mimicking a behavior we already got accustomed to: the instant locomotion.</p>
+    <p>First, we have to determine the next <code>Node</code> this <code>Ship</code> should move to. Just like the last time, we can do that by extracting the first item from the <code>_path</code>:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      private _currentPosition: Vector2D
+      private _next: Node // &lt;--- ADD
+      
+      // ... //
+      // --- ADD --- //
+      public Update(deltaTime: number): void {
+        if(!this.Entity.IsActive){
+          return
+        }
+    
+        this._next = this._path[0]
+        if(!this._next){
+          this.Entity.OnMoveCompleted(this._node)
+          return
+        }
+        
+        this.Node.Ship = null
+        this.Node = this._next
+        this._path.shift()
+    
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>The first thing you may notice is that I added a guard clause at the very beginning of <code>Update</code> to make sure we're dealing only with an active <code>Ship</code>. I also set up <code>_next</code> as a private field vs a local variable. We will need it across many methods soon enough so it should save us some time. Finally, I separated accessing the first element of the <code>_path</code> from extracting it from an array. This is also something that will soon come in handy.</p>
+    <p>But TS is not happy with our decision. It complains that <code>_path</code>  and <code>_node</code>, being private fields, are not accessible in child classes. No problem at all, we can fix that easily:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    // ... //
+    export class ShipLocomotionComponent implements IComponent {
+      // ... //
+      protected _node: Node // &lt;--- CHANGE
+      protected _path: Node[] = [] // &lt;--- CHANGE
+      // ... //
+    
+    }
+    </code></pre>
+    <p>Much better now! Our game behaves the same way again: <code>Ship</code> moves but we don't see it. Well, why not fix that?</p>
+    <p>To actually see the change in the position of <code>Ship</code> we have to update the <code>_currentPosition</code>:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private Update(deltaTime: number): void {
+        // ... //
+        this.Node.Ship = null
+        this.Node = this._next
+        
+        this._currentPosition = this._next.Center // &lt;--- ADD
+        
+        this._path.shift()
+      }
+    }
+    </code></pre>
+    <p>And we got our &quot;instant&quot; locomotion working again:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_2.gif" alt=""></p>
+    <p>Good, now we'll focus on the animation. Take a look again at what we are trying to achieve:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_0.gif" alt=""></p>
+    <p>We want to keep moving between <code>Nodes</code> but this movement should be smooth, or in other words <em>interpolated</em>.</p>
+    <p>Indeed, to achieve animation pretty much all we have to do is to lerp the current position of the <code>Ship</code> between the previous <code>Node's</code> center and <code>next's</code>. But what should be the <code>t</code> parameter?</p>
+    <p>Well, it has to be the &quot;progress&quot;, how much a <code>Ship</code> has already progressed on its way between nodes. We can track that if we know how much <em>time</em> elapsed since we started the movement and <em>how long</em> we expect the entire animation to last. Let's document all this:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    import { Settings } from '@/settings' // &lt;--- ADD
+    import { ShipLocomotionComponent } from './locomotion'
+    
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private _next: Node
+      // --- ADD --- //
+      private _timeElapsed: number
+      private _startPosition: Vector2D
+      private _endPosition: Vector2D
+      // --- ADD --- //
+    
+    
+      // ... //
+      // --- ADD --- //
+      private Animate(deltaTime: number): void {
+        const duration = Settings.ships.locomotion.duration / 1000
+    
+        this._currentPosition = Vector2D.Lerp(this._startPosition, this._endPosition, this._timeElapsed / duration)
+        this._timeElapsed += deltaTime
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>I added a new private <code>Animate</code> method that expects <code>deltaTime</code> as a parameter. <code>deltaTime</code>, if you remember, is passed to <code>Update</code> and indicates how much time elapsed since the last frame. We use it to increment <code>_timeElapsed</code> to make sure it stays up to date.</p>
+    <p>We then use long-ago defined &quot;duration&quot; of locomotion. Divided by 1000, it gives us how many seconds we expect the animation to last. Formula <code>this._timeElapsed / duration</code> gives us the <code>t</code> value for lerp: how much did the <code>Ship</code> already progress. Or, in other words, how much time relative to the entire duration of the animation has already passed.</p>
+    <p>I also defined but have not yet assigned <code>_startPosition</code> and <code>_endPosition</code> fields. Let's assign them now:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      public Update(deltaTime: number): void {
+        // ... //
+      }
+      // --- ADD --- //
+      private StartAnim(): void {
+        this._startPosition = this._node.Center
+        this._endPosition = this._next.Center
+    
+        this._timeElapsed = 0
+      }
+      // --- ADD --- //
+    
+      private Animate(deltaTime: number): void {
+        // ... //
+      }
+    }
+    </code></pre>
+    <p>When we start the animation, we prepare all crucial parameters: start and end position, and restart the clock.</p>
+    <p>Good, but we miss something here: when do we consider the animation <em>completed</em>? Indeed, if we were to call these methods, our game wouldn't know when to stop and would endlessly try to move the poor ship!</p>
+    <p>We have to fix that. One way to do so is by checking the <code>_timeElapsed</code>. If its value is more than the duration of the animation, that means we exceeded the lifetime of the animation and have to stop:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private Animate(deltaTime: number): void {
+        const duration = Settings.ships.locomotion.duration / 1000
+    
+        if(this._timeElapsed &lt; duration){ // &lt;--- ADD
+          this._currentPosition = Vector2D.Lerp(this._startPosition, this._endPosition, this._timeElapsed / duration)
+          this._timeElapsed += deltaTime
+          return // &lt;--- ADD
+        } // &lt;--- ADD
+    
+        this.CompleteAnim() // &lt;--- ADD
+      }
+    
+      // --- ADD --- //
+      private CompleteAnim(): void {
+        this._currentPosition = this._endPosition
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>I added yet another private method: <code>CompleteAnim</code> and I call it when we know that <code>_timeElapsed</code> is either greater or equal to <code>duration</code>. When the animation is complete I reset the current position to the <code>_endPosition</code> just to make sure there are no little miscalculations.</p>
+    <blockquote>
+    <p><em>What miscalculations are these? Well, <code>_timeElapsed</code> is not necessarily can be divided perfectly by <code>duration</code>. This means the <code>t</code> value may never achieve the perfect value <code>1</code>. As a result, the lerp could get to the 99% of value when time has passed.</em></p>
+    </blockquote>
+    <p>One more important thing should happen when animation is complete. This is the moment when we can remove the first element from the <code>_path</code>.  This way when a new frame starts and <code>Update</code> is called, it can pick up and set <code>_next</code> :</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private CompleteAnim(): void {
+        this._currentPosition = this._endPosition
+    
+        this._path.shift() // &lt;--- ADD
+      }
+    }
+    </code></pre>
+    <p>Good! Now, as we established above, the animation happens between two <code>nodes</code>. But it doesn't necessarily cover the entire locomotion process. You see, the movement in our little game is rather a set of repeated sequential animations. Take a look at the reference gif again:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_0.gif" alt=""></p>
+    <p>In the very first example, we want <code>Ship</code> to move from (0, 0) to (0, 2). To do that, <code>Ship</code> travels to (0, 1) in an animated way and THEN travels from (0, 1) to (0, 2) in a similar animated way. So, there are actually 2 animations happening here, one after another.</p>
+    <p>That means we require more &quot;steps&quot; in our code. We already have &quot;start animation&quot; -&gt; &quot;animate&quot; -&gt; &quot;complete animation&quot;. But we also need a code that starts and ends the entire process of locomotion.</p>
+    <p>We could do that directly in <code>Update</code> but to make it more readable, let's add distinguished methods:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private StartLocomotion(): void {} // &lt;--- ADD
+    
+      private StartAnim(): void {
+         // ... //
+      }
+    
+      private Animate(deltaTime: number): void {
+         // ... //
+      }
+    
+      private CompleteAnim(): void {
+         // ... //
+      }
+    
+      private CompleteLocomotion() : void {} // &lt;--- ADD
+    }
+    </code></pre>
+    <p>Note that I deliberately placed  <code>StartLocomotion</code> before all animation methods and <code>CompleteLocomotion</code> after all of them. There is no technical reason for that of course, but hopefully, it helps communicate the order of operations:</p>
+    <p>&quot;Start Locomotion&quot; -&gt; &quot;Start Anim&quot; -&gt; &quot;Animate&quot; -&gt; &quot;Complete Anim&quot; -&gt; &quot;Complete Locomotion&quot;. This is the lifecycle of our animated locomotion!</p>
+    <p>What should we do to start the locomotion? Nothing incredibly complicated here, just set an indicator that locomotion is in progress from now on. When the locomotion completes, we should stop the indicator. And for all that to happen, we actually need a notion of a &quot;progress&quot;:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private _endPosition: Vector2D
+      private _isInProgress = false // &lt;--- ADD
+    
+      // ... //
+      private StartLocomotion(): void {
+        this._isInProgress = true // &lt;--- ADD
+      }
+    
+      // ... //
+      private CompleteLocomotion() : void {
+        this._isInProgress = false // &lt;--- ADD
+      }
+    }
+    </code></pre>
+    <p>A simple flag <code>_isInProgress</code> should do the trick. Also, <code>CompleteLocomotion</code> is a perfect time to tell the outside world that locomotion is done:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private CompleteLocomotion() : void {
+        this._isInProgress = false 
+        this.Entity.OnMoveCompleted(this._node) // &lt;--- ADD
+      }
+    
+    }
+    </code></pre>
+    <p>Similarly, we will benefit from a flag that indicates that animation between <code>nodes</code>
+    is in progress. This will help us from accidentally cutting the animation short:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private _isInProgress = false
+      private _isAnimInProgress = false // &lt;--- ADD
+    
+      // ... //
+      private StartAnim(): void {
+        this._isAnimInProgress = true // &lt;--- ADD
+        // ... //
+      }
+      // ... //
+    
+      private CompleteAnim(): void {
+        this._currentPosition = this._endPosition
+        this._isAnimInProgress = false // &lt;--- ADD
+    
+        this._path.shift()
+      }
+    }
+    </code></pre>
+    <p>And finally, <code>CompleteAnim</code>  is a good place to change the occupancy of the <code>node</code>:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private CompleteAnim(): void {
+        this._currentPosition = this._endPosition
+        this._isAnimInProgress = false
+    
+        // --- ADD --- //
+        this.Node.Ship = null
+        this.Node = this._next
+        // --- ADD --- //
+        
+        this._path.shift()
+      }
+    
+    }
+    </code></pre>
+    <p>Now we are ready to tie everything together!</p>
+    <hr>
+    <h2>Setting things in (loco)motion</h2>
+    <p>First, we need almost nothing from the <code>Update</code> any longer. It worked well for instant locomotion, but we have another goal.</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      public Update(deltaTime: number): void {
+        if(!this.Entity.IsActive){
+          return
+        }
+    
+        this._next = this._path[0]
+        // --- REMOVE --- //
+        if(!this._next){
+          this.Entity.OnMoveCompleted(this._node)
+          return
+        }
+    
+        this.Node.Ship = null
+        this.Node = this._next
+    
+        this._path.shift()
+    
+        this._currentPosition = this._next.Center
+        // --- REMOVE --- //
+      }
+    }
+    </code></pre>
+    <p>And the order of operations is quite simple: assuming  <code>_path</code> is not empty we can check if locomotion already takes place. If not... what are we waiting for? Let's start it!</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      public Update(deltaTime: number): void {
+        // ... //
+        this._next = this._path[0]
+    
+        // --- ADD --- //
+        if(this._next){
+          if(!this._isInProgress){
+            this.StartLocomotion()
+            return
+          }
+        }
+        // --- ADD --- //
+      }
+    }
+    </code></pre>
+    <p>If locomotion has started BUT no animation in progress, its time to start one:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      public Update(deltaTime: number): void {
+        // ... //
+        this._next = this._path[0]
+    
+        
+        if(this._next){
+          if(!this._isInProgress){
+            this.StartLocomotion()
+            return
+          }
+    
+          // --- ADD --- //
+          if(!this._isAnimInProgress){
+            this.StartAnim()
+            return
+          }
+          // --- ADD --- //
+        }
+        
+      }
+    }
+    </code></pre>
+    <p>Well, and you guessed it: if animation is on the way, all we have to do is to keep animating!</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      public Update(deltaTime: number): void {
+        // ... //
+        this._next = this._path[0]
+    
+        if(this._next){
+          if(!this._isInProgress){
+            this.StartLocomotion()
+            return
+          }
+    
+          
+          if(!this._isAnimInProgress){
+            this.StartAnim()
+            return
+          }
+    
+          return this.Animate(deltaTime) // &lt;--- ADD
+        }
+        
+      }
+    }
+    </code></pre>
+    <p>But what if there is no <code>_next</code>? Actually, the only case we care about is if at the time locomotion is still processing. That's the moment we know we have reached the last node and its the time to stop locomotion:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      public Update(deltaTime: number): void {
+        // ... //
+        this._next = this._path[0]
+    
+        if(this._next){
+          if(!this._isInProgress){
+            this.StartLocomotion()
+            return
+          }
+    
+          
+          if(!this._isAnimInProgress){
+            this.StartAnim()
+            return
+          }
+    
+          return this.Animate(deltaTime)
+        }
+    
+        // --- ADD --- //
+        if(this._isInProgress){
+          this.CompleteLocomotion()
+        }
+        // --- ADD --- //
+      }
+    }
+    </code></pre>
+    <p>And finally, we are ready to check out how it works. If you open the browser you should see the beautiful animated <code>Ships</code> flying around. Amazing job!</p>
+    <p><img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_5.gif" alt=""></p>
+    <p>This is fantastic but before we wrap up, I want to address a couple of nuances.</p>
+    <hr>
+    <h2>Calling OnMoveCompleted once</h2>
+    <p>The first one is <code>OnMoveCompleted</code>. You may remember that last time we chatted about how wrong it is for <code>OnMoveCompleted</code> to be constantly called from <code>ShipLocomotionComponent</code>. The reason was that we didn't have enough checks to make sure <code>OnMoveCompleted</code> is called exactly once when locomotion is complete.</p>
+    <p>But in <code>ShipLocomotionAnimatedComponent</code> we finally fixed this issue! Indeed, <code>CompleteLocomotion</code>, which invokes  <code>OnMoveCompleted</code> is called only once when a) there is no <code>_next</code> left AND b) locomotion <em>is</em> in progress. Since we immediately set <code>_isInProgress</code> to false when this happens, we have a reasonable guarantee <code>CompleteLocomotion</code> won't be invoked until the next locomotion starts.</p>
+    <p>Here's a gif to demonstrate that it works as expected:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_4.gif" alt=""></p>
+    <blockquote>
+    <p><em>Im using VSCode debugger here to illustrate that breakpoint hits only once vs every frame. You can use console.log instead if you prefer</em></p>
+    </blockquote>
+    <hr>
+    <h2>Setting Ship before Animation Completes</h2>
+    <p>Another minor issue has to do with the question: &quot;when should we set data vs animation?&quot;</p>
+    <p>What I mean by that is, ideally, we don't want the logic of the game to be a hostage of visual representation. It's not always possible to avoid because games are so rich visual mediums but if we can, we should.</p>
+    <p>Take a look at our game again, pay attention this time to the &quot;Ship&quot; debug message:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_5.gif" alt=""></p>
+    <p>It's probably hard to notice so let's ease our debugging a bit by slowing down the <code>Ship</code>:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    // ... // 
+    export const Settings = Object.freeze({
+      // ... //
+      ships: {
+        // ... //
+        locomotion: {
+          range: 3,
+          duration: 1000 // &lt;--- CHANGE
+        },
+      }
+      // ... //
+    })
+    </code></pre>
+    <p>Now it takes <code>Ship</code> the whole second to complete the path from one node to another:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_6.gif" alt=""></p>
+    <p>We don't want <code>Ship</code> to be such a slowpoke but it's the perfect temporary solution to debug something. Now we should clearly see that <code>Ship</code> gets assigned to the <code>Node</code> <em>after</em> animation is complete.</p>
+    <p>It's not a big deal in our case but generally speaking, we don't probably want to depend on animation that much. What if there is a hiccup and the animation never gets to the perfect ending? Let's play it safe and assign <code>Ship</code> <em>before</em> the animation:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion-animated.ts
+    // ... //
+    export class ShipLocomotionAnimatedComponent extends ShipLocomotionComponent {
+      // ... //
+      private StartAnim(): void {
+        // ... //
+        this._endPosition = this._next.Center
+    
+        // --- ADD --- //
+        this.Node.Ship = null
+        this.Node = this._next
+        // --- ADD --- //
+        
+        this._timeElapsed = 0
+      }
+    
+      // ... //
+      private CompleteAnim(): void {
+        // ... //
+        this._isAnimInProgress = false
+    
+        // --- REMOVE --- //
+        this.Node.Ship = null
+        this.Node = this._next
+        // --- REMOVE --- //
+        
+        this._path.shift()
+      }
+    }
+    </code></pre>
+    <p>And now <code>Ship</code> starts occupying the new <code>Node</code> and frees up the old one immediately:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_7.gif" alt=""></p>
+    <p>Exactly what we wanted! Now, don't forget to revert the duration of <code>Ship's</code> locomotion back to <code>300</code>!</p>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path_7_8.png" alt=""></p>
+    <blockquote>
+    <p>You can find the complete source code of this post in the <code>movement-pathfinding-7</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>.</p>
+    </blockquote>
+    <hr>
+    <h2>Conclusion</h2>
+    <p>On this note, it's time to conclude this installment <em>and</em> this chapter! What a journey it was: we started on a solid foundation with a <code>Node</code> set up on a <code>Grid</code> and <code>Ships</code> being ready to take their place. We got <code>inputs</code> ready as well but with all that <code>Ships</code> were completely immobile!</p>
+    <p>In this Chapter, we first spent a bit of time defining our goals: how we want our <code>Ships</code> to move around in this world, and what <code>locomotion</code> even means for us.
+    We then set up <code>Pathfinder</code> and <code>Graph</code>, and brushed up a bit on different algorithms. Finally, we got to prepare <code>Locomotion</code> components: starting with a simple, instant one and wrapping up with nice smooth animation.</p>
+    <p>I cannot thank you enough for joining me on this <em>path</em>! I hope you enjoyed it, learned something new, and had fun along the way!</p>
+    <p>The future looks even more exciting: our next stop is <code>State Machina</code>, one of the most common patterns you can find in gamedev. It will help us make <code>Ships</code> a bit smarter by laying a foundation for numerous behaviors <code>Ship</code> may have: being &quot;active&quot;, chase, attack, flee, defending itself, etc.</p>
+    <p>I cannot wait to see you in this new Chapter!</p>
+    <hr>
+    <p>I would love to hear your <strong>thoughts</strong>! If you have any <strong>comments</strong>, <strong>suggestions</strong>, <strong>questions</strong>, or any other <strong>feedback</strong>, don’t hesitate to send me a message on <a href="https://twitter.com/GregorySolos">Twitter</a> or <a href="mailto:greg.solo.cv@gmail.com">email</a>!  If you enjoy this series, <strong>please share</strong> it with others. It <strong>really helps</strong> me keep working on it. Thank you for reading, and I’ll see you next time!</p>
+    <p><em>This is Chapter N in the series of tutorials &quot;<strong>Building a game with TypeScript</strong>&quot;. Other Chapters are available here:</em></p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, Part 7)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+                    </div>
+                </div><!--end col-->
+            </div><!--end row-->
+        </div><!--end container-->
+    </section><!--end section-->
+    <!-- End -->    
+    <section class="section pt-0">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <h4 class="text-shadow-title page-title mb-4">Like this piece? Share it!</h4>
+            <ul class="list-inline list-unstyled">
+              <li class="list-inline-item mr-5">
+                &nbsp;<a class="text-primary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fpathfinding-and-movement-7-animated-locomotion"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer Start -->
+        <footer class="bg-light py-4">
+            <div class="container text-center">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-sm-8">
+                        <div class="text-sm-start">
+    
+                        </div>
+                    </div>
+                    <!--end col-->
+    
+                    <div class="col-sm-4 mt-4 mt-sm-0">
+                        <ul class="list-unstyled social-icon text-sm-end social mb-0">
+                            <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!--end row-->
+            </div>
+            <!--end container-->
+        </footer>
+        <!--end footer-->
+        <!-- Footer End -->
+    
+        <!-- Back to top -->
+        <a href="#" onclick="topFunction()" id="back-to-top" class="btn btn-icon btn-primary back-to-top"><i
+                class="mdi mdi-arrow-up icons"></i></a>
+        <!-- Back to top -->
+    
+        <!-- Javascript -->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+         <script src="/js/gifffer.js"></script>
+    
+        <!-- Switcher -->
+        <script type="module" src="/js/cookie.min.mjs"></script>
+    
+        <!-- Code highlight -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        
+        <!-- Main Js -->
+        <script type="module" src="/js/switcher.js"></script>
+       
+        <script src="/js/app.js"></script>
+  </body>
+</html>

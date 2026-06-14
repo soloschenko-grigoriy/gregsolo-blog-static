@@ -1,0 +1,29 @@
+//
+// helper.scss
+//
+.bg-overlay {
+    background-color: $overlay;
+}
+.bg-overlay-white {
+    background-color: $bg-overlay-white;
+}
+
+// Text shadow
+.text-shadow-title {
+    text-shadow: 10px 10px 15px rgba($dark, 0.3);
+}
+
+
+//Title
+.title-dark {
+    color: $dark !important;
+}
+.para-dark {
+    color: $muted !important;
+}
+.title-white {
+    color: $white !important;
+}
+.title-bg-dark {
+    background: $dark !important;
+}

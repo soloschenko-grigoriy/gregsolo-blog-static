@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+            <title>Building a Game With TypeScript. Pathfinding and Movement 1/7. Introduction - Greg Solo's Blog</title>
+            <meta name="description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs" />
+            <meta name="keywords" content="gamedev, typescript, tutorial, pathfinding, movement, ai, canvas, javascript, browser" />
+
+            <meta property="og:title" content="Building a Game With TypeScript. Pathfinding and Movement 1/7. Introduction by Greg Solo">
+            <meta property="og:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="og:site_name" content="Greg Solo's Blog">
+            <meta property="og:type" content="article">
+            <meta property="og:url" content="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">
+            <meta property="og:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-17-introduction.png">
+
+            <meta property="twitter:card" content="summary_large_image">
+            <meta property="twitter:title" content="Building a Game With TypeScript. Pathfinding and Movement 1/7. Introduction by Greg Solo">
+            <meta property="twitter:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="twitter:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-17-introduction.png">
+            <meta property="twitter:site" content="Greg Solo's Blog">
+    
+    <meta content="Greg Solo" name="author" />
+    <meta content="greg.solo.cv@gmail.com" name="mail" />
+    <meta content="https://blog.gregsolo.me" name="website" />
+
+    <!-- favicon -->
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Tobii Lightbox -->
+    <link href="/css/tobii.min.css" rel="stylesheet" type="text/css" />
+    <!-- Slider -->
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <!-- Icons -->
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css">
+    <!-- Main Css -->
+    <link href="/css/style.min.css" rel="stylesheet" type="text/css" id="theme-opt" />
+    <link href="/css/colors/blue.css" rel="stylesheet" id="color-opt">
+    <link href="/css/extra.css" rel="stylesheet">
+    <link href="/css/github-dark-dimmed.css" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KV7Z4BNVS1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-KV7Z4BNVS1');
+    </script>
+</head>
+<html>
+  <body>
+        <!-- Navbar STart -->
+        <header id="topnav" class="defaultscroll sticky">
+            <div class="container">
+                <!-- Logo container-->
+                <ul class="list-unstyled social-icon text-sm-end social mt-3" style="float: left;">
+                    <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i
+                        class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                </ul>
+                <!-- End Logo container-->
+                <div class="menu-extras">
+                    <div class="menu-item">
+                        <!-- Mobile menu toggle-->
+                        <a class="navbar-toggle" id="isToggle" onclick="toggleMenu()">
+                            <div class="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </a>
+                        <!-- End mobile menu toggle-->
+                    </div>
+                </div>
+    
+                <div id="navigation">
+                    <!-- Navigation Menu-->
+                    <ul class="navigation-menu">
+                        <li class="has-submenu parent-menu-item">
+                            <a href="/">All Articles</a>
+                        </li>
+                        <li class="has-submenu parent-menu-item">
+                            <a href="https://gregsolo.me" target="_blank">About me</a>
+                        </li>
+    
+                        <li><a href="https://gregsolo.me/#contact" target="_blank" class="sub-menu-item">Get in Touch</a></li>
+                    </ul>
+                    <!--end navigation menu-->
+                </div>
+                <!--end navigation-->
+            </div>
+            <!--end container-->
+        </header>
+        <!--end header-->
+        <!-- Navbar End -->
+    <section class="section">
+        <div class="container">
+            <div class="row mt-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="title-heading article">
+                            <h1 class="mb-0">Building a Game With TypeScript. Pathfinding and Movement 1/7. Introduction</h1>
+                            <p class="text-soft-primary mt-3"><p>Chapter VI in the <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">series</a> of tutorials on how to build a game from scratch with TypeScript and native browser APIs</p></p>
+    
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li class="list-inline-item small font-weight-normal user text-muted me-2"><i class="uil uil-user text-dark"></i> Greg Solo</li>
+                                <li class="list-inline-item small font-weight-normal tag text-muted me-2">
+                                    <a href="/category/gamedev" class="text-muted"><i class="uil uil-tag-alt text-dark"></i> GameDev</a></li>
+                                <li class="list-inline-item small font-weight-normal date text-muted"><i class="uil uil-calendar-alt text-dark"></i> July 17 2022</li>
+                                <li class="list-inline-item small font-weight-normal date text-muted">
+                                    &nbsp;<a target="_blank" class="text-muted" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-17-introduction"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+                                </li>
+                            </ul>
+                            <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/112642-OOIM8W-880.jpg" class="img-fluid rounded shadow" style="margin-top: 0;margin-bottom: 0" alt="Building a Game With TypeScript. Pathfinding and Movement 1/7. Introduction">
+                            
+                            <p><a href="https://www.freepik.com/vectors/north-america">North america vector created by freepik - www.freepik.com</a></p>
+    <p>Hello there, reader! Welcome to the first installment of Chapter VI “Pathfinding and Movement”. Last time we spent an entire chapter crafting our own Input System. We did that to ensure we have a simple but powerful way to react to user interactions with our game. Having this in place we removed the final roadblock that lay between us and made our game look like… a game.</p>
+    <p>Indeed, all this time we were making preparations, discussing architecture, covered the code with tests. But from the Player's perspective, there is nothing to do here at all. In this Chapter, we finally (finally!) start to make our game feel like a game. And we will do this by allowing Ships to find their path and move along it.</p>
+    <p>If you are looking to brush up on previous Chapters of this series before we begin, you can find them here:</p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (Part 1, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3<a/>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    <blockquote>
+    <p>Feel free to switch to the <code>input-3</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>. It contains the working result of the previous posts and is a great starting point for this one.</p>
+    </blockquote>
+    <hr>
+    <h2>Table of Contents</h2>
+    <ol>
+    <li>Introduction</li>
+    <li>Locomotion Rules</li>
+    <li>Node Debug Tools</li>
+    <li>Vector2D Upgrade</li>
+    <li>Conclusion</li>
+    </ol>
+    <hr>
+    <h2>Locomotion Rules</h2>
+    <p>The goal of our game is to destroy all opponents’ Ships. To achieve this we must ensure Ships can travel along the board: they should be able to advance and retreat. They are dynamic entities like real Ships or soldiers, not static entities like turrets. They have to move to perform their operation.</p>
+    <p>This is great but what exactly do we mean by “movement”? If you recall, in the last installment of Chapter IV: “<a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Ship and Locomotion</a>&quot;we agreed to use term “Locomotion” instead of “Movement” to avoid confusion between “making a move” as a term used in turn-based games, and a “movement” as changing position in time.</p>
+    <p>Every game has rules, and our game is not an exception. First, let’s set up a few ground rules regarding Ship locomotion:</p>
+    <ul>
+    <li>“Locomotion” means the Ship changes its position on the screen from the center of the current Node to the center of the target Node</li>
+    <li>Player can choose the target Node by clicking on a vacant Node</li>
+    <li>Ship can relocate only to the “nearest” Nodes</li>
+    <li>Locomotion happens per-Node basis (see gif)</li>
+    <li>Player can move only one Ship at a turn</li>
+    <li>Locomotion may happen at any time during the Player’s turn if the currently active Ship hasn't  moved yet</li>
+    </ul>
+    <p><img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-1.gif" alt=""></p>
+    <p><img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-2.gif" alt=""></p>
+    <p>Please note, that these are rules of <em>this</em> game, they are not universally true. For example, in some games, you can allow players to relocate all their ships during their turn. Other games may not be even turn-based so there is no restriction on when players can relocate their Ships. Now, let’s talk about every rule in depth.</p>
+    <h4>“Locomotion” means Ship changes its position on the screen from the center of the current Node to the center of the target Node</h4>
+    <p>What does it mean? Ships are not “floating” freely on the board. They have to be attached to a Node, and that Node is a “position” of a Ship.  From the Canvas perspective, we draw the Ship at the center of the Node. We already established all that in “<a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Ship and Locomotion</a>” post, by defining <code>ShipLocomotionComponent</code> and setting up public getter <code>Position</code>:</p>
+    <pre><code class="language-ts">// src/ship/components/locomotion/locomotion.ts
+    export class ShipLocomotionComponent implements IComponent {
+      // ... //
+      public get Position(): Vector2D | null {
+        return this.Node ? this.Node.Center : null
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>The important takeaway is that Ship, at any moment in time “stands on” some Node. There is an interesting caveat to that: how should we treat the interim when the Ship relocates between Nodes? We will discuss this, of course, in this Chapter.</p>
+    <h4>Player can choose the target Node by clicking on a vacant Node</h4>
+    <p>We build an entire Input system for this: to give players a way to command Ships. When the Player clicks vacant Node (that is, Node that has no Ship on it), the Ship must start moving towards that target Node. One thing we should keep in mind: at a given moment only one Ship can move. So, we have to keep track of currently active Ship to know which one of them has to start locomotion. This brings us to the notion of an “Active” Ship and it is mostly out of the scope of this Chapter. We will talk about this in the future when we start designing our State Machine. For now, all we care about is that at some point we need to “activate” the Ship and we will reduce the size of the fleet to just one Ship to keep things simple:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    // ... //
+    export const Settings = Object.freeze({
+      // ... //
+      ships: {
+         fleetSize: 1, // &lt;--- CHANGE
+         // ... //
+      }
+      // ... //
+    })
+    </code></pre>
+    <h4>Ship can relocate only to the “nearest” Nodes</h4>
+    <p>We could allow Ships to be infinitely fast and move all around the board. But it would be much more interesting to allow them to move only in a specific range. That way in the future we can introduce different types of attack (melee vs mid-range vs distant) or even allow players to modify Ships and increase the range. Or we can introduce different types of Ships that have different specs (like heavy armored but slow Ships vs vulnerable but fast ones). Possibilities are endless.
+    To achieve this we need a notion of “range”, an indicator that shows if Node is close enough to be considered for locomotion. If Node is not nearby the active Ship, clicking on it should be disregarded. Of course, we must present this range to the Players otherwise it will be confusing for them. Take a look at the gif one more time, darker Nodes are indicated to be in the range of the active Ship:</p>
+    <p><img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-3.gif" alt=""></p>
+    <h4>Locomotion happens per-Node basis</h4>
+    <p>Locomotion horizontally and vertically is easy. We can just progressively move Ship along the line:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-4.gif" alt=""></p>
+    <p>But what about diagonal? Again, Ships do not float freely in our game. They move along the Grid. Let's agree then, that diagonal movement does not happen “directly” but per-Node:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-5.gif" alt=""></p>
+    <p>Without this rule, we could allow Ships to move along a straight line but this is not something we want:
+    <img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-6.gif" alt=""></p>
+    <h4>Player can move only one Ship at a turn and “Locomotion may happen at any time during Player’s turn if currently, active Ship did not move yet”</h4>
+    <p>These two have more to do with State machines we will talk about in the next Chapters. What is important for us today is that we should activate Ship only once. At least until we have a notion of the “turn”, which is again, the topic of the future.</p>
+    <p>Now, when we have game rules set up, we can think about technical implementations. And there is a lot to think about:</p>
+    <ul>
+    <li>how can we determine if the Node is in range of the Ship relocation?</li>
+    <li>how can we activate the Ship? And when should this happen?</li>
+    <li>after the Player clicks desired Node (assuming it is in range), how can we determine the path to that target Node?</li>
+    <li>how can we handle drawing and animation of the locomotion?</li>
+    </ul>
+    <p>These are all big questions and we will progressively address them, step-by-step. But before we jump into this we should make some preparations.</p>
+    <hr>
+    <h2>Node Debug Tools</h2>
+    <p>If you had a chance to work on the front-end side of web development, you probably relied heavily on debug tools. They are indispensable to understanding what happens with your application. For example, you could use it to analyze the DOM tree.</p>
+    <p>Unfortunately for us, Canvas does not preserve information about what elements it draws. In fact, it does not have a notion of elements, it operates primitives like lines, triangles, and colors. If you recall, this was one of the reasons why we introduced our own <code>Nodes</code>, <code>Grid</code>: to have containers for this information. We also have the <code>Canvas</code> class that is responsible for actual drawing via native browser APIs. But we still lack any debug tools. Chrome DevTools designed to work with DOM are of no help for us here. So, we need to set up something of our own.</p>
+    <p>It should not be hard. What we need is a visual aid for the <code>Nodes</code>: let’s display their <code>Index</code>, which will help us a lot when we start digging into pathfinding.</p>
+    <p>We start by upgrading how <code>Nodes</code> are drawn:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.ts
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //
+      public Update(deltaTime: number): void {
+         this.Clear()
+         this.Draw()
+         this.DrawDebugInfo() // &lt;--- ADD
+       }
+      // ... //
+      // --- ADD --- //
+      private DrawDebugInfo(): void {}
+      // --- ADD --- //	
+    }	
+    </code></pre>
+    <p>If you recall, we draw every frame, since plenty of stuff can change since the last one. It should be of no surprise that we will draw our debug information on every frame too.</p>
+    <p>What do we want to draw? A simple text that displays an index of this particular <code>Node</code>, somewhere in the corner so it won’t distract us. The problem, however, is that our little rendering engine does not support drawing text. Why not fix this overlook?</p>
+    <p>First, let’s go the good-old TDD route and set a simple test for this new functionality:</p>
+    <pre><code class="language-ts">// src/utils/canvas/canvas.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Canvas', () =&gt; {
+      // ... //
+      describe('&gt;&gt; API', () =&gt; {
+        // ... //
+        it('should set css style', () =&gt; {
+          // ... //
+        })
+    
+        // --- ADD --- //
+        it('should draw the text', () =&gt; { })
+        // --- ADD --- //
+    
+        describe('&gt;&gt;&gt; calculate local point by global', () =&gt; {
+           // ... //
+        })
+      })
+    }) 
+    </code></pre>
+    <p>As before, we can simply spy on the native browser’s API, in this case, its <code>fillText</code> method:</p>
+    <pre><code class="language-ts">// src/utils/canvas/canvas.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Canvas', () =&gt; {
+      // ... //
+      describe('&gt;&gt; API', () =&gt; {
+        // ... //
+        it('should draw the text', () =&gt; { 
+          // --- ADD --- //
+          const spy = jest.spyOn(canvas.Context, 'fillText')
+    
+          expect(spy).not.toBeCalled()
+          // --- ADD --- //
+        })
+    
+        // ... //
+      })
+    }) 
+    </code></pre>
+    <p>And then verify that it was indeed called with proper arguments:</p>
+    <pre><code class="language-ts">// src/utils/canvas/canvas.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Canvas', () =&gt; {
+      // ... //
+      describe('&gt;&gt; API', () =&gt; {
+        // ... //
+        it('should draw the text', () =&gt; { 
+          // --- ADD --- //
+          const text = 'text'
+          const position = new Vector2D(0, 0)
+          const color = new Color(255, 10, 20, 1)
+    	  // --- ADD --- //
+    
+          const spy = jest.spyOn(canvas.Context, 'fillText')
+    
+          expect(spy).not.toBeCalled()
+    
+          // --- ADD --- //
+          canvas.DrawText(text, position, color)
+    
+          expect(spy).toBeCalledWith(text, position.x, position.y)
+          // --- ADD --- //
+        })
+    
+    	// ... //
+      })
+    }) 
+    </code></pre>
+    <p>Great, now to the actual functionality:</p>
+    <pre><code class="language-ts">// src/utils/canvas/canvas.ts
+    // ... //
+    export class Canvas implements IAwake {
+      // ... //
+      public DrawText(): void {}
+    }
+    </code></pre>
+    <p>Nothing fancy here, we just want to draw a text:</p>
+    <pre><code class="language-ts">// src/utils/canvas/canvas.ts
+    // ... //
+    export class Canvas implements IAwake {
+      // ... //
+      public DrawText(
+        text: string,
+        position: Vector2D,
+        color: Color = new Color(255, 255, 255, 1),
+        fontSize = 14,
+        font = 'Arial'
+      ): void {
+        this._ctx.font = `${fontSize}px ${font}`
+        this._ctx.fillStyle = color.AsString()
+        this._ctx.fillText(text, position.x, position.y)
+      }}
+    </code></pre>
+    <p>Here we once again utilize helpers we created before: <code>Vector2D</code> to determine the position of the text and <code>Color</code> to determine its… well, color.</p>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all tests should pass with <code>npm t</code>:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-7.png" alt=""></p>
+    <p>Now, we can utilize <code>DrawText</code> within our debug tool:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.ts
+    import { IComponent, Color } from '@/utils' // &lt;--- CHANGE
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //  
+      private DrawDebugInfo(): void {
+        // --- ADD --- //
+        const entity = this.Entity
+        CanvasLayer.Background.DrawText(
+           `${entity.Index.x}, ${entity.Index.y}`,
+           entity.Start,
+           new Color(255, 0, 0, 1)
+         )}
+        // --- ADD --- //	
+      }
+    }	
+    </code></pre>
+    <p>Here we draw <code>Index</code> on top of the <code>Node</code> with nasty red color and we have a clear visual indication of which <code>Node</code> is where:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-8.png" alt=""></p>
+    <p>Awesome! We will continue extending our debug tool with more information in the future, but for now, let’s make a few simple improvements. First, we don’t want to present debug information to our players. It's for us only, for our internal investigation, it's not meant to be seen by everyone. Let's provide a dedicated “mode” in which debug information is presented:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    // ... //
+    export const Settings = Object.freeze({
+     // ... //
+     debugMode: true
+    })
+    </code></pre>
+    <p>And only if the game runs in this Mode shall we render debug info:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.ts
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //
+      private DrawDebugInfo(): void {
+        // --- ADD --- //
+        if (!Settings.debugMode) {
+          return
+        }
+        // --- ADD --- //	
+        // ... //
+      }
+    }	
+    </code></pre>
+    <hr>
+    <h2>Vector2D Upgrade</h2>
+    <p>Also, let’s update our <code>Vector2d</code> to provide a way to present itself as a string instead of doing this manually on the consumer level:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.ts
+    export class Vector2D {
+      // ... //
+      // --- ADD --- //
+      public AsString(): string {
+         return `(${this.x},${this.y})`
+      }
+      // --- ADD --- //
+    }
+    </code></pre>
+    <p>And since we are in the neighborhood, let's support the opposite operation, the same way we did with <code>Color</code> a long time ago:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.ts
+    export class Vector2D {
+      // ... //
+     
+      // --- ADD --- //
+      public static FromString(str: string): Vector2D {
+        const parsed = str.replace(new RegExp(/\(|\)/, 'g'), '').split(',')
+        const x = Number(parsed[0])
+        const y = Number(parsed[1])
+    
+        if (isNaN(x) || isNaN(y)) {
+          throw new Error(`Cannot instantiate Vector2D from string ${str}`)
+        }
+    
+        return new Vector2D(x, y)
+      }
+      // --- ADD --- //
+    
+      public AsString(): string {
+         return `(${this.x},${this.y})`
+      }
+    }
+    </code></pre>
+    <p>And, of course, we support these new features with tests:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.spec.ts
+    import { Vector2D } from './vector2D'
+    
+    describe('&gt;&gt;&gt; Vector2D', () =&gt; {
+      describe('&gt;&gt; AsString', () =&gt; { })
+    
+      describe('&gt;&gt; GetFromString', () =&gt; { })
+    })
+    </code></pre>
+    <p>The first one has only one test, simple verification that provided vector properly converts itself to the string:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.spec.ts
+    import { Vector2D } from './vector2D'
+    
+    describe('&gt;&gt;&gt; Vector2D', () =&gt; {
+      describe('&gt;&gt; AsString', () =&gt; {
+        // --- ADD --- //
+        it('should return stringified coordinates of the Vector2D', () =&gt; {
+          expect(new Vector2D(0, 0).AsString()).toBe('(0,0)')
+          expect(new Vector2D(5, 4).AsString()).toBe('(5,4)')
+        })
+        // --- ADD --- //
+      })
+      // ... //
+    })
+    </code></pre>
+    <p>The second one has two cases. Optimistic scenario checks that <code>Vector2D</code> successfully instantiated from the string, assuming the string is of correct format:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.spec.ts
+    import { Vector2D } from './vector2D'
+    
+    describe('&gt;&gt;&gt; Vector2D', () =&gt; {
+      // ... //
+      describe('&gt;&gt; GetFromString', () =&gt; {
+        // --- ADD --- //
+        it('should instantiate Vector2D by stringified value', () =&gt; {
+          const point = Vector2D.FromString('(0,4)')
+          expect(point.x).toBe(0)
+          expect(point.y).toBe(4)
+        })
+        // --- ADD --- //
+      })
+    })
+    </code></pre>
+    <p>The error scenario validates if code throws an error if provided string is of wrong format:</p>
+    <pre><code class="language-ts">// src/utils/vector2D/vector2D.spec.ts
+    import { Vector2D } from './vector2D'
+    
+    describe('&gt;&gt;&gt; Vector2D', () =&gt; {
+      // ... //
+      describe('&gt;&gt; GetFromString', () =&gt; {
+        // ... //
+        // --- ADD --- //
+        it('should throw error if instantiation is impossible', () =&gt; {
+          expect(() =&gt; Vector2D.FromString('0')).toThrow()
+        })
+    	// --- ADD --- //
+      })
+    })
+    </code></pre>
+    <p>Nice! Lets refactoring our draw component to use this new functionality:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.ts
+    import { IComponent, Color } from '@/utils' // &lt;--- CHANGE
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //  
+      private DrawDebugInfo(): void {
+        const entity = this.Entity
+        CanvasLayer.Background.DrawText(
+          `${entity.Index.x}, ${entity.Index.y}`, // &lt;--- REMOVE
+          entity.Index.AsString(), // &lt;--- ADD
+          entity.Start,
+          new Color(255, 0, 0, 1)
+        )}	
+      }
+    }	
+    </code></pre>
+    <p>And that’s it! At this point, our code should successfully compile with <code>npm start</code> and all tests should pass with <code>npm t</code>:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-0-9.png" alt=""></p>
+    <blockquote>
+    <p>You can find the complete source code of this post in the <code>movement-pathfinding-1</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>.</p>
+    </blockquote>
+    <hr>
+    <h2>Conclusion</h2>
+    <p>This concludes our introduction to this Chapter. We have set up clear goals by describing the rules of the game when it comes to locomotion. We outlined the main technical challenges we need to overcome in this Chapter, as well as prepared a little debug tool which will help us implement new features with continuously increasing complexity.</p>
+    <p>Next time, we are looking to answer the first two questions of the technical list we established before: how can we find Nodes in a limited range around the Ship, as well as how and when to activate the Ship?</p>
+    <p>I would love to hear your <strong>thoughts</strong>! If you have any <strong>comments</strong>, <strong>suggestions</strong>, <strong>questions</strong>, or any other <strong>feedback</strong>, don’t hesitate to drop me a message on <a href="https://twitter.com/GregorySolos" target="_blank">Twitter</a>!  If you enjoy this series, <strong>please share</strong> it with others. It <strong>helps</strong> me keep working on it. Thank you for reading, and I’ll see you next time!</p>
+    <p><em>This is Chapter VI in the series of tutorials &quot;<strong>Building a game with TypeScript</strong>&quot;. Other Chapters are available here:</em></p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (Part 1, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3<a/>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    
+                    </div>
+                </div><!--end col-->
+            </div><!--end row-->
+        </div><!--end container-->
+    </section><!--end section-->
+    <!-- End -->    
+    <section class="section pt-0">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <h4 class="text-shadow-title page-title mb-4">Like this piece? Share it!</h4>
+            <ul class="list-inline list-unstyled">
+              <li class="list-inline-item mr-5">
+                &nbsp;<a class="text-primary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-17-introduction"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer Start -->
+        <footer class="bg-light py-4">
+            <div class="container text-center">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-sm-8">
+                        <div class="text-sm-start">
+    
+                        </div>
+                    </div>
+                    <!--end col-->
+    
+                    <div class="col-sm-4 mt-4 mt-sm-0">
+                        <ul class="list-unstyled social-icon text-sm-end social mb-0">
+                            <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!--end row-->
+            </div>
+            <!--end container-->
+        </footer>
+        <!--end footer-->
+        <!-- Footer End -->
+    
+        <!-- Back to top -->
+        <a href="#" onclick="topFunction()" id="back-to-top" class="btn btn-icon btn-primary back-to-top"><i
+                class="mdi mdi-arrow-up icons"></i></a>
+        <!-- Back to top -->
+    
+        <!-- Javascript -->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+         <script src="/js/gifffer.js"></script>
+    
+        <!-- Switcher -->
+        <script type="module" src="/js/cookie.min.mjs"></script>
+    
+        <!-- Code highlight -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        
+        <!-- Main Js -->
+        <script type="module" src="/js/switcher.js"></script>
+       
+        <script src="/js/app.js"></script>
+  </body>
+</html>

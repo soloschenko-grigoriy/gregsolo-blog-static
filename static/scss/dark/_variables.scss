@@ -1,0 +1,88 @@
+//
+// variables.scss
+//
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+// Color
+$white:                     #1f2d3d;
+
+$primary:                   #f7ac44;//726ae9
+$secondary:                 #efeff7;
+$success:                   #52cc99;
+$warning:                   #ffbf66;
+$info:                      #66ccff;
+$danger:                    #f86446;
+$dark:                      #ffffff;
+$black:                     #161c2d;
+$muted:                     #9bacc4;
+$light:                     #253649;
+$dark-blue:                 #08083d;
+
+// Switcher
+$purple:                    #7952B3;
+$cyan:                      #66ccff;
+$green:                     #52cc99;
+$red:                       #f86446;
+$yellow:                    #f7ac44;
+
+// Gray
+$gray-100:                  #495057;
+$gray-200:                  #6c757d;
+$gray-300:                  #adb5bd;
+$gray-400:                  #ced4da;
+$gray-500:                  #dee2e6;
+$gray-600:                  #e9ecef;
+$gray-700:                  #f8f9fa;
+
+//Custom
+$footer:                    #35404E;
+
+// Overlay
+$overlay:                   rgba($dark, 0.7);
+$bg-overlay-white:          rgba($white, 0.95);
+$bg-overlay-primary:           rgba($primary, 0.65);
+
+// Body Background
+$shadow:                    0 0 3px rgba($dark, .2);
+$shadow-md:                 0 5px 13px rgba($dark, .2);
+$shadow-lg:                 0 10px 25px rgba($dark, .2);
+
+// Base font
+$font-size-base:            15px;
+$menu-font-size:            15px;
+$submenu-font-size:         13.5px;
+$logo-font-size:            22px;
+
+$font-family-base:          'Inter', sans-serif;
+$font-family-secondary:     'Inter', sans-serif;
+
+$colors: (
+    "primary": $primary,
+    "secondary": $secondary,
+    "success": $success,
+    "warning": $warning,
+    "info": $info,
+    "danger": $danger,
+    "dark-blue": $dark-blue,
+    "dark": $dark,
+    "muted": $muted,
+    "light": $light,
+    "footer": $footer,
+    "white": $white,
+);
+
+$heading-font-sizes: (
+    "h1": 42px,
+    "h2": 36px,
+    "h3": 30px,
+    "h4": 24px,
+    "h5": 18px,
+    "h6": 16px,
+);
+
+$display-font-sizes: (
+    "display-1": 80px,
+    "display-2": 72px,
+    "display-3": 64px,
+    "display-4": 56px,
+)

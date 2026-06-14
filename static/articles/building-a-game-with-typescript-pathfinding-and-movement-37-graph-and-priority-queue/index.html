@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+            <title>Building a Game With TypeScript. Pathfinding and Movement 3/7. Graph and Priority Queue - Greg Solo's Blog</title>
+            <meta name="description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs" />
+            <meta name="keywords" content="TypeScript, native, browser, API, native browser APIs, tutorial, canvas, javascript, build a game,  from scratch" />
+
+            <meta property="og:title" content="Building a Game With TypeScript. Pathfinding and Movement 3/7. Graph and Priority Queue by Greg Solo">
+            <meta property="og:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="og:site_name" content="Greg Solo's Blog">
+            <meta property="og:type" content="article">
+            <meta property="og:url" content="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">
+            <meta property="og:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue.png">
+
+            <meta property="twitter:card" content="summary_large_image">
+            <meta property="twitter:title" content="Building a Game With TypeScript. Pathfinding and Movement 3/7. Graph and Priority Queue by Greg Solo">
+            <meta property="twitter:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="twitter:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue.png">
+            <meta property="twitter:site" content="Greg Solo's Blog">
+    
+    <meta content="Greg Solo" name="author" />
+    <meta content="greg.solo.cv@gmail.com" name="mail" />
+    <meta content="https://blog.gregsolo.me" name="website" />
+
+    <!-- favicon -->
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Tobii Lightbox -->
+    <link href="/css/tobii.min.css" rel="stylesheet" type="text/css" />
+    <!-- Slider -->
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <!-- Icons -->
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css">
+    <!-- Main Css -->
+    <link href="/css/style.min.css" rel="stylesheet" type="text/css" id="theme-opt" />
+    <link href="/css/colors/blue.css" rel="stylesheet" id="color-opt">
+    <link href="/css/extra.css" rel="stylesheet">
+    <link href="/css/github-dark-dimmed.css" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KV7Z4BNVS1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-KV7Z4BNVS1');
+    </script>
+</head>
+<html>
+  <body>
+        <!-- Navbar STart -->
+        <header id="topnav" class="defaultscroll sticky">
+            <div class="container">
+                <!-- Logo container-->
+                <ul class="list-unstyled social-icon text-sm-end social mt-3" style="float: left;">
+                    <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i
+                        class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                </ul>
+                <!-- End Logo container-->
+                <div class="menu-extras">
+                    <div class="menu-item">
+                        <!-- Mobile menu toggle-->
+                        <a class="navbar-toggle" id="isToggle" onclick="toggleMenu()">
+                            <div class="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </a>
+                        <!-- End mobile menu toggle-->
+                    </div>
+                </div>
+    
+                <div id="navigation">
+                    <!-- Navigation Menu-->
+                    <ul class="navigation-menu">
+                        <li class="has-submenu parent-menu-item">
+                            <a href="/">All Articles</a>
+                        </li>
+                        <li class="has-submenu parent-menu-item">
+                            <a href="https://gregsolo.me" target="_blank">About me</a>
+                        </li>
+    
+                        <li><a href="https://gregsolo.me/#contact" target="_blank" class="sub-menu-item">Get in Touch</a></li>
+                    </ul>
+                    <!--end navigation menu-->
+                </div>
+                <!--end navigation-->
+            </div>
+            <!--end container-->
+        </header>
+        <!--end header-->
+        <!-- Navbar End -->
+    <section class="section">
+        <div class="container">
+            <div class="row mt-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="title-heading article">
+                            <h1 class="mb-0">Building a Game With TypeScript. Pathfinding and Movement 3/7. Graph and Priority Queue</h1>
+                            <p class="text-soft-primary mt-3"><p>Chapter VI in the <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">series</a> of tutorials on how to build a game from scratch with TypeScript and native browser APIs</p></p>
+    
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li class="list-inline-item small font-weight-normal user text-muted me-2"><i class="uil uil-user text-dark"></i> Greg Solo</li>
+                                <li class="list-inline-item small font-weight-normal tag text-muted me-2">
+                                    <a href="/category/gamedev" class="text-muted"><i class="uil uil-tag-alt text-dark"></i> GameDev</a></li>
+                                <li class="list-inline-item small font-weight-normal date text-muted"><i class="uil uil-calendar-alt text-dark"></i> August 10 2022</li>
+                                <li class="list-inline-item small font-weight-normal date text-muted">
+                                    &nbsp;<a target="_blank" class="text-muted" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+                                </li>
+                            </ul>
+                            <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/114_03_2022_30.jpg" class="img-fluid rounded shadow" style="margin-top: 0;margin-bottom: 0" alt="Building a Game With TypeScript. Pathfinding and Movement 3/7. Graph and Priority Queue">
+                            
+                            <p><a href='https://www.freepik.com/vectors/node' target="_blank_">Node vector created by WangXiNa - www.freepik.com</a></p>
+    <p>Hey folks! In the last article, we spent our time highlighting <code>Nodes</code> in configurable <code>range</code>. Our next step is calculating the path Ship can take from its current position to the one chosen by the Player.</p>
+    <p>I am going to skip the theory behind pathfinding algorithms and techniques. There are an enormous amount of books, papers, and videos out there, describing every single detail of these algorithms and patterns. For example, consider <a href="https://www.redblobgames.com/pathfinding/a-star/introduction.html">Amit Patel's</a> blog, one of the best <em>interactive</em> explanations of many game-dev-related topics I’ve ever seen. I personally have learned a ton from his work and cannot recommend it highly enough.</p>
+    <p>Moving forward I will assume that you have an understanding of what a graph and a queue are, and how Breadth-First Search and A* algorithms work. We will apply this knowledge to build a pathfinding system in our TypeScript game.</p>
+    <p>Throughout the series, we follow the &quot;incremental approach&quot; mantra: start simple and bring on complexity when necessary. In the spirit of that, we will start our pathfinding journey with, perhaps, the easiest algorithm for the job: Breadth-First Search. Then, we extend it to become smarter, eventually ending up with an A*.</p>
+    <p>To implement these algorithms we need some data structures that do not exist out-of-the-box in JavaScript/Typescript: <code>Graph</code> and  <code>Priority Queue</code>. In this installment, we will focus on preparing these structures.</p>
+    <p>In Chapter VI <em>“Pathfinding and Movement ”</em>, we finally make our Ships alive! You can find other Chapters of this series here:</p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, Part 3, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    <blockquote>
+    <p>Feel free to switch to the <code>movement-pathfinding-2</code> branch of the <a href="">repository</a>. It contains the working result of the previous posts and is a great starting point for this one.</p>
+    </blockquote>
+    <hr>
+    <h2>Table of Contents</h2>
+    <ol>
+    <li>Introduction</li>
+    <li>Graph and Graph Node</li>
+    <li>Interface and tests for Priority Queue</li>
+    <li>Implementing Priority Queue</li>
+    <li>Conclusion</li>
+    </ol>
+    <hr>
+    <h2>Graph and Graph Node</h2>
+    <p><code>Graph</code>, by the end of the day, is a set of locations and connections between these locations. Or, using another terminology, <code>Nodes</code> and <code>Edges</code>. Nodes can be presented in many ways but we will simply consider them coordinates presented by <code>Vector2D</code>.</p>
+    <p>We could run away with a simple object of type <code>Vector2D</code> but having a dedicated interface will slightly ease our efforts when we will apply Graph on our Grid:</p>
+    <pre><code class="language-ts">// src/utils/graph/node.h.ts
+    import { Vector2D } from '@/utils'
+    
+    export interface IGraphNode {
+      Position: Vector2D
+    }
+    
+    </code></pre>
+    <p>In our, rather naive first implementation of Graph, we can agree that <code>Graph</code> is something that can return all nodes that are connected to a provided one. In other words, returns all its neighbors:</p>
+    <pre><code class="language-ts">// src/utils/graph/graph.h.ts
+    import { IGraphNode } from './node.h'
+    
+    export interface IGraph {
+      GetNeighborsOf(node: IGraphNode): IGraphNode[]
+    }
+    </code></pre>
+    <p>Also, it should be able to calculate the cost of moving from one node to another. This can become in handy if we want to introduce different types of nodes on our grid: some of them can be easily &quot;passable&quot; like plains and roads, some harder (&quot;rivers&quot;, &quot;forests&quot;) some impassable at all (&quot;mountains&quot;, &quot;swamps&quot;, etc):</p>
+    <pre><code class="language-ts">// src/utils/graph/graph.h.ts
+    // ... //
+    export interface IGraph {
+      GetCost(a: IGraphNode, b: IGraphNode): number // &lt;--- ADD
+      GetNeighborsOf(node: IGraphNode): IGraphNode[]
+    }
+    
+    </code></pre>
+    <p>And traditionally let's add barrel file:</p>
+    <pre><code class="language-ts">// src/utils/graph/index.ts
+    export * from './graph.h'
+    export * from './node.h'
+    </code></pre>
+    <p>And don't forget to re-export our new module:</p>
+    <pre><code class="language-ts">// src/utils/index.ts
+    // ... //
+    export * from './ecs'
+    export * from './graph' // &lt;--- ADD
+    export * from './lifecycle'
+    // ... //
+    </code></pre>
+    <hr>
+    <h2>Interface and tests for Priority Queue</h2>
+    <p>Priority Queue’s API is also straightforward. It should support adding and removing elements from the queue (<code>Enqueue</code> and <code>Dequeue</code> respectively) as well as the <code>IsEmpty</code> property:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.h.ts
+    export interface IPriorityQueue&lt;T&gt; {
+      IsEmpty: boolean
+    
+      Enqueue(item: T, priority: number): void
+      Dequeue(): T
+    }
+    </code></pre>
+    <p>Note, that <code>IPriorityQueue</code> is a generic type: it depends on some unknown type <code>T</code>. This is the type of element we put in the queue. It does not have to have any knowledge about what type is that, or what it does. All it cares about is that <code>Enqueue</code> can add only the same type of items into this instance of the queue. So, if we create a queue of strings, for example, the compiler won’t allow us to add numbers to it. Neat!</p>
+    <blockquote>
+    <p>The only difference between Priority and regular Queues is the ability to prioritize items in the queue. This way, it's not just first-in-first-out, but rather &quot;first-in-first-in-priority-out&quot;.</p>
+    </blockquote>
+    <p>It will make our life slightly easier to also have a dedicated type for a pair &quot;priority-value&quot;:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.h.ts
+    // ... //
+    // --- ADD --- //
+    export interface IPriorityQueueItem&lt;T&gt; {
+      priority: number
+      value: T
+    }
+    // --- ADD --- //
+    </code></pre>
+    <p>Following the TDD approach, let's add tests first:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.spec.ts
+    import { IPriorityQueue } from './priority-queue.h'
+    
+    describe('&gt;&gt;&gt; Priority Queue', () =&gt; {
+      let q: IPriorityQueue&lt;string&gt;
+      
+      it('should return IsEmpty true if queue is empty and false otherwise', () =&gt; { })
+      it('should Enqueue and Dequeue items in the queue according to priority', () =&gt; { })
+    })
+    </code></pre>
+    <p>It could be a queue of any type so we'll make do with <code>string</code> as one of the simplest types in JS.</p>
+    <p>Testing <code>IsEmpty</code> is quite simple. We validate it is <code>true</code> by default when q has no elements. Then we add something and check that <code>IsEmpty</code> is no longer true. Finally, we'll dequeue element and expect <code>IsEmpty</code> to be truthful again:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Priority Queue', () =&gt; {
+      // ... //
+      
+      it('should return IsEmpty true if queue is empty and false otherwise', () =&gt; { 
+        // --- ADD --- //
+        expect(q.IsEmpty).toBeTruthy()
+    
+        q.Enqueue('one', 1)
+        expect(q.IsEmpty).toBeFalsy()
+    
+        q.Dequeue()
+        expect(q.IsEmpty).toBeTruthy()
+        // --- ADD --- //
+      })
+      // ... //
+    })
+    </code></pre>
+    <p>Testing <code>Enqueue</code> and <code>Dequeue</code> is also straightforward. We need to verify that after adding items with a specific priority they are dequeued in proper order. The lower provided priority is, the upper item should be in the q:</p>
+    <pre><code class="language-ts">// src/utils/queue/queue.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Queue', () =&gt; {
+      // ... //
+      it('should Enqueue and Dequeue items in the queue according to priority', () =&gt; {
+        // --- ADD --- //
+        q.Enqueue('two', 1)
+        q.Enqueue('one', 0)
+        q.Enqueue('three', 2)
+    
+        expect(q.Dequeue()).toEqual&lt;string&gt;('one')
+        expect(q.Dequeue()).toEqual&lt;string&gt;('two')
+        expect(q.Dequeue()).toEqual&lt;string&gt;('three')
+        // --- ADD --- //
+      })
+      // ... //
+    })
+    </code></pre>
+    <p>We add three items to an empty queue and then dequeue them one by one. Note, that even tho we added &quot;two&quot; first and &quot;one&quot; second, we expect the latter to be on the top of the queue anyway because its priority is 0.</p>
+    <p>Awesome! No surprise that our tests still fail: we are yet to add the implementation!</p>
+    <hr>
+    <h2>Implementing Priority Queue</h2>
+    <p>There are <a href="https://itnext.io/priority-queue-in-typescript-6ef23116901" target="_blank">a few ways</a> to implement Priority Queue with TypeScript. I'll go with perhaps the easiest one: I'll use a native JS array and I am going to sort it during the insertion. We can always revisit and add other implementations in the future if we hit any issues:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.ts
+    import { IPriorityQueue } from './priority-queue.h'
+    
+    export class PriorityQueue&lt;T&gt; implements IPriorityQueue&lt;T&gt; {
+      public IsEmpty: boolean
+      public Enqueue(value: T, priority: number): void {
+        throw new Error('Method not implemented.')
+      }
+      public Dequeue(): T {
+        throw new Error('Method not implemented.')
+      }
+    }
+    </code></pre>
+    <p>Number one thing we need is a storage of items:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.ts
+    import { IPriorityQueue, IPriorityQueueItem } from './priority-queue.h' // &lt;--- CHANGE
+    
+    export class PriorityQueue&lt;T&gt; implements IPriorityQueue&lt;T&gt; {
+      private _items: IPriorityQueueItem&lt;T&gt;[] = [] // &lt;--- ADD
+      // ... //
+    }
+    </code></pre>
+    <p><code>IsEmpty</code> can do its job by comparing <code>items</code> length:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.ts
+    export class PriorityQueue&lt;T&gt; implements IPriorityQueue&lt;T&gt; {
+      // ... //
+    	
+      // --- CHANGE --- //
+      public get IsEmpty(): boolean {
+        return this._items.length === 0
+      }
+      // --- CHANGE --- //
+    
+      // ... //
+    }
+    </code></pre>
+    <p>To implement <code>Dequeue</code> we can turn to the native methods but also we have to check that item is in the <code>queue</code> in the first place</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.ts
+    export class PriorityQueue&lt;T&gt; implements IPriorityQueue&lt;T&gt; {
+      // ... //
+      public Dequeue(): T {
+        // --- CHANGE --- //
+        const item = this._items.shift()
+        if (typeof item === 'undefined') {
+          throw new Error('Attempt to dequeue from an empty queue')
+        }
+    
+        return item.value
+        // --- CHANGE --- //
+      }
+    }
+    </code></pre>
+    <p>And finally, <code>Enqueue</code> is all about adding an item to the array and then sorting it based on priority:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.ts
+    export class PriorityQueue&lt;T&gt; implements IPriorityQueue&lt;T&gt; {
+      public Enqueue(value: T, priority: number): void {
+        // --- CHANGE --- //
+        this._items.push({
+          value,
+          priority
+        })
+    
+        this._items = this._items.sort((a, b) =&gt; a.priority - b.priority)
+        // --- CHANGE --- //
+      }
+    }
+    </code></pre>
+    <p>And to make sure it works, let's instantiate and test it:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/priority-queue.spec.ts
+    // ... //
+    import { PriorityQueue } from './priority-queue' // &lt;--- ADD
+    
+    describe('&gt;&gt;&gt; Priority Queue', () =&gt; {
+      let q: IPriorityQueue&lt;string&gt;
+      // --- ADD --- //
+      beforeEach(() =&gt; {
+        q = new PriorityQueue&lt;string&gt;() 
+      })
+      // --- ADD --- //
+      // ... //
+    })
+    </code></pre>
+    <p>Finally, we should update barrel files accordingly:</p>
+    <pre><code class="language-ts">// src/utils/priority-queue/index.ts
+    export * from './priority-queue'
+    export * from './priority-queue.h'
+    </code></pre>
+    <p>And the one in <code>utils</code> folder:</p>
+    <pre><code class="language-ts">// src/utils/index.ts
+    // ... //
+    export * from './onclick'
+    export * from './priority-queue' // &lt;--- ADD
+    export * from './vector2D'
+    </code></pre>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all test should pass with <code>npm t</code>:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-3-0.png" alt=""></p>
+    <blockquote>
+    <p>You can find the complete source code of this post in the <code>movement-pathfinding-3</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>.</p>
+    </blockquote>
+    <hr>
+    <h2>Conclusion</h2>
+    <p>Awesome job! We have prepared the utilities we'll need to implement our Pathfinder. The next installment will be all about it. Cannot wait to see you then!</p>
+    <p>I would love to hear your <strong>thoughts</strong>! If you have any <strong>comments</strong>, <strong>suggestions</strong>, <strong>questions</strong>, or any other <strong>feedback</strong>, don’t hesitate to send me a message on <a href="https://twitter.com/GregorySolos">Twitter</a> or <a href="mailto:greg.solo.cv@gmail.com">email</a>!  If you enjoy this series, <strong>please share</strong> it with others. It <strong>really helps</strong> me keep working on it. Thank you for reading, and I’ll see you next time!</p>
+    <p><em>This is Chapter VI in the series of tutorials &quot;<strong>Building a game with TypeScript</strong>&quot;. Other Chapters are available here:</em></p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, Part 3, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">Part 5</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    
+                    </div>
+                </div><!--end col-->
+            </div><!--end row-->
+        </div><!--end container-->
+    </section><!--end section-->
+    <!-- End -->    
+    <section class="section pt-0">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <h4 class="text-shadow-title page-title mb-4">Like this piece? Share it!</h4>
+            <ul class="list-inline list-unstyled">
+              <li class="list-inline-item mr-5">
+                &nbsp;<a class="text-primary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer Start -->
+        <footer class="bg-light py-4">
+            <div class="container text-center">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-sm-8">
+                        <div class="text-sm-start">
+    
+                        </div>
+                    </div>
+                    <!--end col-->
+    
+                    <div class="col-sm-4 mt-4 mt-sm-0">
+                        <ul class="list-unstyled social-icon text-sm-end social mb-0">
+                            <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!--end row-->
+            </div>
+            <!--end container-->
+        </footer>
+        <!--end footer-->
+        <!-- Footer End -->
+    
+        <!-- Back to top -->
+        <a href="#" onclick="topFunction()" id="back-to-top" class="btn btn-icon btn-primary back-to-top"><i
+                class="mdi mdi-arrow-up icons"></i></a>
+        <!-- Back to top -->
+    
+        <!-- Javascript -->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+         <script src="/js/gifffer.js"></script>
+    
+        <!-- Switcher -->
+        <script type="module" src="/js/cookie.min.mjs"></script>
+    
+        <!-- Code highlight -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        
+        <!-- Main Js -->
+        <script type="module" src="/js/switcher.js"></script>
+       
+        <script src="/js/app.js"></script>
+  </body>
+</html>

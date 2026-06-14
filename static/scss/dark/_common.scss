@@ -1,0 +1,79 @@
+//
+// blogs.scss
+//
+.blog-post {
+    &:hover {
+        box-shadow: $shadow-md !important;
+    }
+}
+
+// CTA
+.play-btn {
+    color: $white;
+}
+
+// features.scss
+.features {
+    &:hover {
+        box-shadow: $shadow-lg !important;
+    }
+}
+
+//Owl Slider
+.customer-testi {
+    .content {
+        &:before {
+            border: 8px solid $dark;
+            border-color: transparent $white $white transparent;
+            box-shadow: 2px 2px 2px -1px rgba($dark, 0.15);
+        }
+    }
+}
+//footer
+footer {
+    color: $gray-300;
+}
+
+//Work
+.container-filter {
+    li {
+        color: $muted !important;
+        &.active,
+        &:hover {
+            color: $dark !important;
+        }
+    }
+}
+
+.work-container {
+    &.work-classic {
+        .work-image {
+            &:hover {
+                box-shadow: $shadow;
+            }
+        }
+    }
+    &.work-modern {
+        .icons {
+            .work-icon {
+                &:hover {
+                    color: $dark !important;
+                }
+            }
+        }
+    }
+    &.work-grid {
+        &:hover { 
+            box-shadow: $shadow;
+        }
+    }
+}
+
+// BOXED HOME
+#sThemes-layout {
+    background: $light;
+    .sThemesbox {
+        background: $white;
+        box-shadow: $shadow;
+    }
+}

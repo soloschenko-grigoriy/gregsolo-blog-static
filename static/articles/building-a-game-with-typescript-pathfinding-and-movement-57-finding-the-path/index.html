@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+            <title>Building a Game With TypeScript. Pathfinding and Movement 5/7. Finding the Path - Greg Solo's Blog</title>
+            <meta name="description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs" />
+            <meta name="keywords" content="tutorial, game, gamedev, TypeScript, native browser APIs, canvas, pathfinder" />
+
+            <meta property="og:title" content="Building a Game With TypeScript. Pathfinding and Movement 5/7. Finding the Path by Greg Solo">
+            <meta property="og:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="og:site_name" content="Greg Solo's Blog">
+            <meta property="og:type" content="article">
+            <meta property="og:url" content="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path">
+            <meta property="og:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path.png">
+
+            <meta property="twitter:card" content="summary_large_image">
+            <meta property="twitter:title" content="Building a Game With TypeScript. Pathfinding and Movement 5/7. Finding the Path by Greg Solo">
+            <meta property="twitter:description" content="Chapter VI in the series of tutorials on how to build a game from scratch with TypeScript and native browser APIs">
+            <meta property="twitter:image" content="https://blog.gregsolo.me/uploads/og_building-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path.png">
+            <meta property="twitter:site" content="Greg Solo's Blog">
+    
+    <meta content="Greg Solo" name="author" />
+    <meta content="greg.solo.cv@gmail.com" name="mail" />
+    <meta content="https://blog.gregsolo.me" name="website" />
+
+    <!-- favicon -->
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Tobii Lightbox -->
+    <link href="/css/tobii.min.css" rel="stylesheet" type="text/css" />
+    <!-- Slider -->
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <!-- Icons -->
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css">
+    <!-- Main Css -->
+    <link href="/css/style.min.css" rel="stylesheet" type="text/css" id="theme-opt" />
+    <link href="/css/colors/blue.css" rel="stylesheet" id="color-opt">
+    <link href="/css/extra.css" rel="stylesheet">
+    <link href="/css/github-dark-dimmed.css" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KV7Z4BNVS1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-KV7Z4BNVS1');
+    </script>
+</head>
+<html>
+  <body>
+        <!-- Navbar STart -->
+        <header id="topnav" class="defaultscroll sticky">
+            <div class="container">
+                <!-- Logo container-->
+                <ul class="list-unstyled social-icon text-sm-end social mt-3" style="float: left;">
+                    <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i
+                        class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                </ul>
+                <!-- End Logo container-->
+                <div class="menu-extras">
+                    <div class="menu-item">
+                        <!-- Mobile menu toggle-->
+                        <a class="navbar-toggle" id="isToggle" onclick="toggleMenu()">
+                            <div class="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </a>
+                        <!-- End mobile menu toggle-->
+                    </div>
+                </div>
+    
+                <div id="navigation">
+                    <!-- Navigation Menu-->
+                    <ul class="navigation-menu">
+                        <li class="has-submenu parent-menu-item">
+                            <a href="/">All Articles</a>
+                        </li>
+                        <li class="has-submenu parent-menu-item">
+                            <a href="https://gregsolo.me" target="_blank">About me</a>
+                        </li>
+    
+                        <li><a href="https://gregsolo.me/#contact" target="_blank" class="sub-menu-item">Get in Touch</a></li>
+                    </ul>
+                    <!--end navigation menu-->
+                </div>
+                <!--end navigation-->
+            </div>
+            <!--end container-->
+        </header>
+        <!--end header-->
+        <!-- Navbar End -->
+    <section class="section">
+        <div class="container">
+            <div class="row mt-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="title-heading article">
+                            <h1 class="mb-0">Building a Game With TypeScript. Pathfinding and Movement 5/7. Finding the Path</h1>
+                            <p class="text-soft-primary mt-3"><p>Chapter VI in the <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">series</a> of tutorials on how to build a game from scratch with TypeScript and native browser APIs</p></p>
+    
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li class="list-inline-item small font-weight-normal user text-muted me-2"><i class="uil uil-user text-dark"></i> Greg Solo</li>
+                                <li class="list-inline-item small font-weight-normal tag text-muted me-2">
+                                    <a href="/category/gamedev" class="text-muted"><i class="uil uil-tag-alt text-dark"></i> GameDev</a></li>
+                                <li class="list-inline-item small font-weight-normal date text-muted"><i class="uil uil-calendar-alt text-dark"></i> December 24 2022</li>
+                                <li class="list-inline-item small font-weight-normal date text-muted">
+                                    &nbsp;<a target="_blank" class="text-muted" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+                                </li>
+                            </ul>
+                            <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/4500_5_03.jpg" class="img-fluid rounded shadow" style="margin-top: 0;margin-bottom: 0" alt="Building a Game With TypeScript. Pathfinding and Movement 5/7. Finding the Path">
+                            
+                            <p><a href="https://www.freepik.com/vectors/cute-astronaut" target="_blank_">Cute astronaut vector created by catalyststuff - www.freepik.com</a></p>
+    <p>Hello there! I hope you are enjoying this series so far. <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Last time</a> we successfully prepared our Pathfinder that helps calculate the path on some abstract <code>Graph</code>. In this installment, we are going to use it and build a path on our real <code>Grid</code></p>
+    <hr>
+    <p>In Chapter VI <em>“Pathfinding and Movement ”</em>, we finally make our Ships alive! You can find other Chapters of this series here:</p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, Part 5, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    <blockquote>
+    <p>Feel free to switch to the <code>movement-pathfinding-4</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>. It contains the working result of the previous posts and is a great starting point for this one.</p>
+    </blockquote>
+    <hr>
+    <h2>Table of Contents</h2>
+    <ol>
+    <li>Introduction</li>
+    <li>Grid as a Graph</li>
+    <li>Visualizing the Path</li>
+    <li>Testing OnClick and Draw components</li>
+    <li>Testing DeterminePathTo</li>
+    <li>Conclusion</li>
+    </ol>
+    <hr>
+    <h2>Grid as a Graph</h2>
+    <p>Our Pathfinder relies on <code>IGraph</code> for its calculations. Simply put, we need someone to implement the <code>IGraph</code> we created in the last installment. And there is no better candidate than <code>Grid</code> since it handles all bulk logic around `Node:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    import { Entity, Vector2D, IGraph, IGraphNode } from '@/utils' // &lt;--- CHANGE
+    // ... //
+    
+    export class Grid extends Entity implements IGraph { // &lt;--- CHANGE
+    
+      // ... //
+    
+      // --- ADD --- //
+      public GetCost(a: IGraphNode, b: IGraphNode): number {
+        throw new Error('Method not implemented.')
+      }
+      public GetNeighborsOf(node: IGraphNode): IGraphNode[] {
+        throw new Error('Method not implemented.')
+      }
+      // --- ADD --- //
+    
+      private InitNodes(): void {
+        // ... //
+      }
+    }
+    </code></pre>
+    <p>And we can also ask <code>Node</code> to conform to <code>IGraphNode</code>:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    import { Entity, Vector2D, IGraphNode } from '@/utils' // &lt;--- CHANGE
+    // ... //
+    
+    export class Node extends Entity implements IGraphNode { // &lt;--- CHANGE
+      // ... //
+      // --- ADD --- //
+      public get Position(): Vector2D {
+        return this.Index
+      }
+      // --- ADD --- //
+      constructor(...){
+        // ... //
+      }
+      // ... //
+    }
+    
+    </code></pre>
+    <p>All we need is to implement a <code>Position</code> getter which is incredibly easy for us since we already have something that can be seen as &quot;Position&quot; on the graph:  <code>Index</code>!</p>
+    <blockquote>
+    <p>We probably could even use <code>Center</code> for this purpose but it has additional complexity: physical <code>canvas</code> coordinates of the center of the <code>Node</code> calculated based on the start position and size. We don't need this complication, the <code>Index</code> that defines position within the grid coordinate system is all we need.</p>
+    </blockquote>
+    <p>Having <code>Node</code> that conforms to <code>IGraphNode</code>, we can now reference it instead of the abstract <code>IGraphNode</code> interface:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    export class Grid extends Entity implements IGraph {
+      // ... //
+      public GetCost(a: Node, b: Node): number { // &lt;--- CHANGE
+        return 1 // &lt;--- CHANGE
+      }
+    
+      public GetNeighborsOf(node: Node): Node[] { // &lt;--- CHANGE
+        return node.Neighbors // &lt;--- CHANGE
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>Note that I also edited the methods to make them do some real jobs. <code>GetNeighborsOf</code> simply returns <code>Neighbors</code> of the <code>Node</code> while <code>GetCost</code> always returns 1, meaning that all Nodes are equally accessible on our grid.</p>
+    <p>Now, let's introduce a pathfinder and ask it to calculate a path for us:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    import { Pathfinder } from '@/pathfinder' // &lt;--- ADD
+    import { GridOnclickComponent } from './components'
+    
+    export class Grid extends Entity implements IGraph {
+      private _nodes: Node[] = []
+      private _pathfinder = new Pathfinder(this, Grid.Heuristic) // &lt;--- ADD
+      private _currentPath: Node[] = [] // &lt;--- ADD
+      
+      public static Heuristic = (a: IGraphNode, b: IGraphNode): number =&gt; Math.abs(a.Position.x - b.Position.x) + Math.abs(a.Position.y - b.Position.y) // &lt;--- ADD
+    
+      // ... //
+      public GetNeighborsOf(node: Node): Node[] {
+        return node.Neighbors
+      }
+    
+      // --- ADD --- //
+      public DeterminePathTo(node: Node): void {}
+      // --- ADD --- //
+      // ... //
+    }
+    </code></pre>
+    <p>A few things happen here. First, we define a private field <code>_pathfinder</code> and instantiate <code>Pathfinder</code> into it. It requires 2 things to be instantiated as well: graph (which is our <code>Grid</code>) and <code>heuristic</code> function. For the latter I defined a static property <code>Heuristic</code> that returns <a href="https://en.wikipedia.org/wiki/Taxicab_geometry" target="_blank">Manhattan distance</a> between 2 nodes. That's more than enough at this point.</p>
+    <p>I also stored <code>_currentPath</code> which will be calculated when <code>DeterminePathTo(node: Node)</code> is called.</p>
+    <p>Well, what are we waiting for? Let's go ahead and indeed call it:</p>
+    <pre><code class="language-ts">// src/grid/components/onclick/onclick.ts
+    // ... //
+    export class GridOnclickComponent extends OnclickComponent {
+      public ClickOn(point: Vector2D): void {
+        for (const node of this.Entity.Nodes) {
+    	  node.IsActive = node.Occupies(point) // &lt;--- REMOVE
+    	  // --- ADD --- // 
+          if (node.Occupies(point)) {
+            this.Entity.DeterminePathTo(node)
+          }
+          // --- ADD --- //
+        }
+      }
+    }
+    </code></pre>
+    <p>Do you remember what  <code>ClickOn</code>  does? It gets invoked when we click anywhere on the grid. <code>node.Occupies(point)</code> helps us determine which node exactly is under click and we can supply it to <code>DeterminePathTo</code>. Easy!</p>
+    <p>Now, back at <code>DeterminePathTo</code>, we can use this information to calculate a path to the <code>Node</code> that's being clicked:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    export class Grid extends Entity implements IGraph {
+      // ... //
+      public DeterminePathTo(node: Node): void {
+        this._currentPath = this._pathfinder.CalculatePath(???, node) as Node[] // &lt;--- ADD
+      }
+    }
+    </code></pre>
+    <p>Ok, we know the destination but we also need a starting point. This should be the <code>node</code> where the active ship is currently standing. We don't have this information here yet, but this is not a problem.</p>
+    <p>First, I define a public property <code>ActiveShip</code> which can be nullable:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    import { Pathfinder } from '@/pathfinder'
+    import { Ship } from '@/ship' // &lt;--- ADD
+    // ... //
+    
+    export class Grid extends Entity implements IGraph {
+      // ... //
+      public static Heuristic = (a: IGraphNode, b: IGraphNode): number =&gt; Math.abs(a.Position.x - b.Position.x) + Math.abs(a.Position.y - b.Position.y)
+    
+      public ActiveShip: Ship | null = null // &lt;--- ADD
+      // ... //
+    }
+    </code></pre>
+    <p>Ideally, we want to set this property via State Machine that controls who's turn it is now, which ship is active currently, etc. We will talk about this in the future chapters but for now, it is sufficient to set it up the same way we &quot;activated&quot; the ship before: simply hardcoding the first ship in the fleet:</p>
+    <pre><code class="language-ts">// src/fleet/fleet.ts
+    // ... //
+    export class Fleet extends Entity {
+      // ... //
+      private PrepareShips(): void {
+        // ... //
+        // @todo start with state machine
+        if (this.Team === Team.A) 
+          // --- CHANGE --- //
+          const activeShip = this._ships[0]
+          activeShip.IsActive = true
+          this._grid.ActiveShip = activeShip
+          // --- CHANGE --- //
+        }
+      }
+    }
+    </code></pre>
+    <p>We also need to expose the <code>Node</code> the ship is standing on. Remember, it's not a <code>Position</code> because position deals with canvas coordinates. We need <code>Node's</code>  index:</p>
+    <pre><code class="language-ts">// src/ship/ship.ts
+    // ... //
+    export class Ship extends Entity {
+      // ... //
+      // --- ADD --- //
+      public get Node(): Node {
+        return this._locomotionComponent.Node
+      }
+      // --- ADD --- //
+      public get Position(): Vector2D | null {
+        return this._locomotionComponent.Position
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>Nice! Now, assuming the active ship is set, we can determine the path from its node to the clicked node:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    // ... //
+    export class Grid extends Entity implements IGraph {
+      // ... //
+      public DeterminePathTo(node: Node): void {
+        // --- ADD --- //
+        if(!this.ActiveShip){
+          return
+        }
+        // --- ADD --- //
+        
+        this._currentPath = this._pathfinder.CalculatePath(this.ActiveShip.Node, node) as Node[] // &lt;---- CHANGE
+      }
+    }
+    </code></pre>
+    <p>Well, code now compiles but… how can we make sure it works? I mean, if you open your browser and start clicking around absolutely nothing happens. It's time for some visualization!</p>
+    <hr>
+    <h2>Visualizing Path</h2>
+    <p>We already visualized <code>Nodes</code> in different ways before: we highlighted them when they were clicked, and we highlighted them when they became &quot;accessible&quot; by the current ship. We are going to follow the same approach to visualize the path: we will change the color of <code>Node</code> if it's &quot;on the path&quot;.</p>
+    <p>First, we define a public field for that in the <code>Node</code>:</p>
+    <pre><code class="language-ts">// src/node/node.ts
+    // ... //
+    export class Node extends Entity implements IGraphNode {
+      // ... //
+      public IsInLocomotionRange = false
+      public IsOnPath = false // &lt;--- ADD
+      // ... //
+    }
+    </code></pre>
+    <p>And introduce a new <code>setting</code>:</p>
+    <pre><code class="language-ts">// src/settings/settings.ts
+    // ... //
+    export const Settings = Object.freeze({
+      grid: {
+        // ... //
+        color: {
+          regular: new Color(245, 245, 245, 1),
+          inLocomotionRange: new Color(176, 190, 197, 1),
+          onPath: new Color(51, 255, 153, 1) // &lt;--- ADD
+        }
+      },
+      // ... //
+    })
+    </code></pre>
+    <p>Time to update how we draw the <code>node</code>. Since our color logic becomes slightly more sophisticated let's move it into a dedicated method:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.ts
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //
+      private Draw(): void {
+        CanvasLayer.Background.FillRect(
+          this.Entity.Start,
+          this.Entity.Size,
+          this.GetColor() // &lt;--- CHANGE
+        )
+      }
+    
+      // --- ADD --- //
+      private GetColor(): Color {
+        if(this.Entity.IsInLocomotionRange){
+          return Settings.grid.color.inLocomotionRange
+        }
+    
+        return Settings.grid.color.regular
+      }
+      // --- ADD --- //
+      // ... //
+    }
+    </code></pre>
+    <p>And then add a case for <code>isOnPath</code>:</p>
+    <pre><code class="language-ts">//src/node/components/draw/draw.ts
+    // ... //
+    export class NodeDrawComponent implements IComponent {
+      // ... //
+      private GetColor(): Color {
+        // --- ADD --- //
+        if(this.Entity.IsOnPath){
+          return Settings.grid.color.onPath
+        }
+        // --- ADD --- //
+        if(this.Entity.IsInLocomotionRange){
+          return Settings.grid.color.inLocomotionRange
+        }
+    
+        return Settings.grid.color.regular
+      }
+      // ... //
+    }
+    </code></pre>
+    <p>Finally, we wrap this whole thing up by setting <code>isOnPath</code> on the <code>node</code> after calculating the path:</p>
+    <pre><code class="language-ts">// src/grid/grid.ts
+    export class Grid extends Entity implements IGraph {
+      // ... //
+      public DeterminePathTo(node: Node): void {
+        this._currentPath.forEach(item =&gt; item.IsOnPath = false) // &lt;--- ADD
+    
+        if(!this.ActiveShip){
+          return
+        }
+    
+        this._currentPath = this._pathfinder.CalculatePath(this.ActiveShip.Node, node) as Node[]
+        this._currentPath.forEach(item =&gt; item.IsOnPath = true) // &lt;--- ADD
+      }
+    }
+    </code></pre>
+    <p>Note, that before <code>IsOnPath</code> I'm cleaning up the previous path.</p>
+    <p>And now we can open a browser and test our little pathfinder:</p>
+    <p><img data-gifffer="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-5-1.gif" alt=""></p>
+    <p>Looks amazing! Tho path is boringly predictable we can spice it up in the future. Following an incremental approach, we'll improve when we need to</p>
+    <hr>
+    <h2>Testing OnClick component</h2>
+    <p>And as always, let's ensure the quality of our code by fixing existing tests and adding some new ones. We kicked out temporary code in <code>onclick.ts</code> and now the test is failing:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-5-2.png" alt="">
+    Makes sense, we don't activate the node anymore but instead attempt to find a path to it. To test that we can simply ensure <code>DeterminePathTo</code> is called with a proper <code>node</code>:</p>
+    <pre><code class="language-ts">// src/grid/components/onclick/onclick.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Grid Click Component', () =&gt; {
+      // ... //
+      it('should update node if user click within it\'s range', () =&gt; {
+        const spy = jest.spyOn(comp.Entity, 'DeterminePathTo') // &lt;--- ADD
+    
+        comp.ClickOn(new Vector2D(100, 100))
+        expect(comp.Entity.Nodes[0].IsActive).toBeTruthy() // &lt;--- REMOVE
+        expect(comp.Entity.Nodes[1].IsActive).toBeFalsy() // &lt;--- REMOVE
+    
+        expect(spy).toBeCalledWith(comp.Entity.Nodes[0]) // &lt;--- ADD
+      })
+    })
+    </code></pre>
+    <p>Nice! All tests should pass now:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-5-3.png" alt="">
+    This means its time to say goodbye to <code>node's</code> temporary <code>IsActive</code> field, we don't need it anymore:</p>
+    <pre><code class="language-ts">//  src/node/node.ts
+    // ... //
+    export class Node extends Entity implements IGraphNode {
+      // --- REMOVE --- //
+      /**
+       * @todo replace temp property with real functionality
+       */
+      public IsActive = false
+      // --- REMOVE --- //
+      public Ship: Ship | null = null
+      // ... //
+    }
+    
+    </code></pre>
+    <h2>Testing Draw component</h2>
+    <p>Out next step is the <code>draw</code> component. This should be easy enough: we just need to add one more case for the color:</p>
+    <pre><code class="language-ts">// src/node/components/draw/draw.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Node Draw Component', () =&gt; {
+      // ... //
+      it('should render range color if entity is in range, path color if is on path, and regular color otherwise', () =&gt; { // &lt;--- CHANGE
+        const spyFillRect = jest.spyOn(CanvasLayer.Background, 'FillRect')
+    
+    	// --- ADD --- //
+        comp.Entity.IsOnPath = true
+        comp.Update(0)
+        expect(spyFillRect).toBeCalledWith(comp.Entity.Start, comp.Entity.Size, Settings.grid.color.onPath)
+        // --- ADD --- //
+        
+        comp.Entity.IsOnPath = false // &lt;--- ADD
+        comp.Entity.IsInLocomotionRange = true
+        comp.Update(0)
+        expect(spyFillRect).toBeCalledWith(comp.Entity.Start, comp.Entity.Size, Settings.grid.color.inLocomotionRange)
+    
+        comp.Entity.IsInLocomotionRange = false
+        comp.Update(0)
+        expect(spyFillRect).toBeCalledWith(comp.Entity.Start, comp.Entity.Size, Settings.grid.color.regular)
+      })
+    
+    })
+    </code></pre>
+    <p>Here we simply verify that <code>fillRect</code> is being called with the <code>onPath</code> color when  <code>node</code> has the <code>IsOnPath</code> flag:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-5-3.png" alt=""></p>
+    <hr>
+    <h2>Testing DeterminePathTo</h2>
+    <p>This one is a bit more complicated. We need to verify 2 scenarios: if there is an Active ship and if there is none:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      // --- ADD --- //
+      describe('Determine path to', () =&gt; {
+        it('should NOT calculate path if there is no currently active ship', () =&gt; {
+        })
+    
+        it('should calculate path if there is currently active ship', () =&gt; {
+        })
+      })
+      // --- ADD --- //
+    })
+    </code></pre>
+    <p>In both cases, we need <code>Grid</code> to fully initialize <code>nodes</code> with their neighbors. Fortunately, this happens when the grid awakens:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      describe('Determine path to', () =&gt; {
+        // --- ADD --- //
+        beforeEach(() =&gt; {
+          grid.Awake()
+        })
+        // --- ADD --- //
+        // ... //
+      })
+    })
+    
+    </code></pre>
+    <p>Also, let's agree that in both cases the destination node will be the very last node of the <code>grid</code>:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      describe('Determine path to', () =&gt; {
+        let destination: Node // &lt;--- ADD
+        beforeEach(() =&gt; {
+          grid.Awake()
+          destination = grid.Nodes[grid.Nodes.length - 1] // &lt;--- ADD
+        })
+        // ... //
+      })
+    })
+    </code></pre>
+    <p>We can test the first scenario by making sure the active ship is null and that after calling <code>DeterminePathTo</code> none of the nodes received the <code>IsOnPath</code> flag:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      describe('Determine path to', () =&gt; {
+        // ... //
+        it('should NOT calculate path if there is no currently active ship', () =&gt; {
+          // --- ADD --- //
+          grid.ActiveShip = null
+    
+          grid.DeterminePathTo(destination)
+    
+          expect(grid.Nodes.some(node =&gt; node.IsOnPath)).toBeFalsy()
+          // --- ADD --- //
+        })
+        // ... //
+      })
+    })
+    </code></pre>
+    <p>As simple as that! JS native <code>Array.some</code> returns true only if it found at least one node with the <code>IsOnPath</code> flag on. The test should pass successfully:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-5-4.png" alt="">
+    To check the second scenario, we need to instantiate the fake <code>ship</code> first and set it somewhere on the <code>grid</code>. I'll use the very first node of the grid as a current placement of the ship:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    import { Grid, mockGridFactory } from '@/grid'
+    // --- ADD --- //
+    import { mockShipFactory } from '@/ship'  
+    import { mockFleetFactory } from '@/fleet' 
+    // --- ADD --- //
+    
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      describe('Determine path to', () =&gt; {
+        // ... //
+        it('should calculate path if there is currently active ship', () =&gt; {
+          grid.ActiveShip = mockShipFactory(mockFleetFactory(), grid.Nodes[0]) // &lt;--- ADD
+        })
+      })
+    })
+    </code></pre>
+    <p>Then we could test that there is at least one node that becomes &quot;on a path&quot; after invoking <code>DeterminePathTo</code>:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      describe('Determine path to', () =&gt; {
+        // ... //
+        it('should calculate path if there is currently active ship', () =&gt; {
+          grid.ActiveShip = mockShipFactory(mockFleetFactory(), grid.Nodes[0]) 
+          
+          grid.DeterminePathTo(destination) // &lt;--- ADD
+          
+          expect(grid.Nodes.some(node =&gt; node.IsOnPath)).toBeTruthy()
+        })
+      })
+    })
+    </code></pre>
+    <p>This works but is a bit vague, we can do better.</p>
+    <p>Let's check <em>exactly</em> which nodes are set on the path:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      describe('Determine path to', () =&gt; {
+        // ... //
+        it('should calculate path if there is currently active ship', () =&gt; {
+          // ... // 
+          grid.DeterminePathTo(destination)
+          
+          expect(grid.Nodes.some(node =&gt; node.IsOnPath)).toBeTruthy() // &lt;--- REMOVE
+          const path = grid.Nodes.filter(node =&gt; node.IsOnPath) // &lt;--- ADD
+        })
+      })
+    })
+    
+    </code></pre>
+    <p>Now we can check each item in the <code>path</code> and make sure it was calculated correctly. How can we do that? Let's visualize again!</p>
+    <p>If we open the browser we can see that the active ship is currently on a node <code>(0, 0)</code> just like in our test. If we choose the <em>last</em> node as a destination, we can visualize the path that our test scenario should calculate:
+    <img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-5-5.png" alt=""></p>
+    <p>So, all that is left for us is to test that nodes in <code>path</code> are the ones highlighted in the browser: (1, 0), then (2, 0),  then (3, 0), etc:</p>
+    <pre><code class="language-ts">// src/grid/grid.spec.ts
+    // ... //
+    import { mockShipFactory } from '@/ship'
+    import { mockFleetFactory } from '@/fleet'
+    import { Vector2D } from '@/utils' //  &lt;--- ADD
+    
+    describe('&gt;&gt;&gt; Grid', () =&gt; {
+      // ... //
+      describe('Determine path to', () =&gt; {
+        // ... //
+        it('should calculate path if there is currently active ship', () =&gt; {
+          // ... // 
+          const path = grid.Nodes.filter(node =&gt; node.IsOnPath)
+          // --- ADD --- //
+          expect(path[0].Index).toStrictEqual(new Vector2D(1, 0))
+          expect(path[1].Index).toStrictEqual(new Vector2D(2, 0))
+          expect(path[2].Index).toStrictEqual(new Vector2D(3, 0))
+          expect(path[3].Index).toStrictEqual(new Vector2D(4, 0))
+          expect(path[4].Index).toStrictEqual(new Vector2D(5, 0))
+          expect(path[5].Index).toStrictEqual(new Vector2D(5, 1))
+          expect(path[6].Index).toStrictEqual(new Vector2D(5, 2))
+          expect(path[7].Index).toStrictEqual(new Vector2D(5, 3))
+          expect(path[8].Index).toStrictEqual(new Vector2D(5, 4))
+          expect(path[9].Index).toStrictEqual(new Vector2D(5, 5))
+          // --- ADD --- //
+        })
+      })
+    })
+    
+    </code></pre>
+    <p>At this point, our code should successfully compile with <code>npm start</code> and all tests should pass with <code>npm t</code>:</p>
+    <p><img src="https://raw.githubusercontent.com/soloschenko-grigoriy/blog-images/main/path-5-4.png" alt=""></p>
+    <blockquote>
+    <p>You can find the complete source code of this post in the <code>movement-pathfinding-5</code> branch of the <a href="https://github.com/soloschenko-grigoriy/gamedev-patterns-ts">repository</a>.</p>
+    </blockquote>
+    <hr>
+    <h2>Conclusion</h2>
+    <p>Congrats, you did it! You have a fully functioning path-finding solution for this game! No matter where <code>Ship</code> may stand, we can quickly determine a path to the desired destination. In the next installments of this Chapter, we are going to combine everything we built previously and make <code>Ship</code> actually move around the path. See you then!</p>
+    <p>I would love to hear your <strong>thoughts</strong>! If you have any <strong>comments</strong>, <strong>suggestions</strong>, <strong>questions</strong>, or any other <strong>feedback</strong>, don’t hesitate to send me a message on <a href="https://twitter.com/GregorySolos">Twitter</a> or <a href="mailto:greg.solo.cv@gmail.com">email</a>!  If you enjoy this series, <strong>please share</strong> it with others. It <strong>really helps</strong> me keep working on it. Thank you for reading, and I’ll see you next time!</p>
+    <p><em>This is Chapter N in the series of tutorials &quot;<strong>Building a game with TypeScript</strong>&quot;. Other Chapters are available here:</em></p>
+    <ul>
+    <li><a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-d29b913858e">Introduction</a></li>
+    <li><a href="https://medium.com/@gregsolo/entity-component-system-in-action-with-typescript-f498ca82a08e">Chapter I. Entities and Components</a></li>
+    <li>Chapter II. Game loop (<a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-with-typescript-game-loop-part-1-2-699919bb9b71">Part 1</a>, <a href="https://medium.com/@gregsolo/gamedev-patterns-and-algorithms-in-action-with-typescript-game-loop-2-2-c0d57a8e5ec2">Part 2</a>)</li>
+    <li>Chapter III. Drawing Grid (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-1-5-aaf68797a0bb">Part 1</a>, <a href="https://medium.com/javascript-in-plain-english/building-a-game-with-typescript-drawing-grid-2-5-206555719490">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-3-5-1fb94211c4aa">Part 3</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-iii-drawing-grid-4-5-398af1dd638d">Part 4</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-grid-5-5-49454917b3af">Part 5</a>)</li>
+    <li>Chapter IV. Ships (<a href="https://medium.com/@gregsolo/building-a-game-with-typescript-colors-and-layers-337b0e4d71f">Part 1,</a> <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-team-and-fleet-f223d39e9248">Part 2</a>, <a href="https://medium.com/@gregsolo/building-a-game-with-typescript-drawing-ship-14e6c19caa38">Part 3</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-ship-and-locomotion-4f5969675993">Part 4</a>)</li>
+    <li>Chapter V. Input system (<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-1-3-46d0b3dd7662">Part 1</a>, <a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-2-3-cd419e36027c">Part 2</a>,<a href="https://gregsolo.medium.com/building-a-game-with-typescript-input-system-3-3-8492552579f1">Part 3</a>)</li>
+    <li>Chapter VI. Pathfinding and Movement (<a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-17-introduction">Part 1</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-27-highlighting-locomotion-range">Part 2</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-37-graph-and-priority-queue">Part 3</a>, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-47-pathfinder">Part 4</a>, Part 5, <a href="https://blog.gregsolo.me/articles/building-a-game-with-typescript-pathfinding-and-movement-6-instant-locomotion">Part 6</a>, <a href="https://blog.gregsolo.me/articles/pathfinding-and-movement-7-animated-locomotion">Part 7</a>)</li>
+    <li>Chapter VII. State Machina</li>
+    <li>Chapter VII. Attack System: Health and Damage</li>
+    <li>Chapter IX. Winning and Losing the Game</li>
+    <li>Chapter X. Enemy AI</li>
+    </ul>
+    
+                    </div>
+                </div><!--end col-->
+            </div><!--end row-->
+        </div><!--end container-->
+    </section><!--end section-->
+    <!-- End -->    
+    <section class="section pt-0">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <h4 class="text-shadow-title page-title mb-4">Like this piece? Share it!</h4>
+            <ul class="list-inline list-unstyled">
+              <li class="list-inline-item mr-5">
+                &nbsp;<a class="text-primary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fblog.gregsolo.me%2Farticles%2Fbuilding-a-game-with-typescript-pathfinding-and-movement-57-finding-the-path"><i class="uil uil-linkedin" title="LinkedIn"></i> Share on LinkedIn</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer Start -->
+        <footer class="bg-light py-4">
+            <div class="container text-center">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-sm-8">
+                        <div class="text-sm-start">
+    
+                        </div>
+                    </div>
+                    <!--end col-->
+    
+                    <div class="col-sm-4 mt-4 mt-sm-0">
+                        <ul class="list-unstyled social-icon text-sm-end social mb-0">
+                            <li class="list-inline-item"><a href="https://medium.com/@gregsolo" target="_blank" class="rounded"><i
+                                class="uil uil-medium-m" title="Medium"></i></a></li>
+                    <li class="list-inline-item"><a href="https://github.com/soloschenko-grigoriy" target="_blank" 
+                            class="rounded"><i class="uil uil-github" title="GitHub"></i></a></li>
+                    <li class="list-inline-item"><a href="https://www.linkedin.com/in/soloschenko/en" target="_blank"
+                            class="rounded"><i class="uil uil-linkedin" title="LinkedIn"></i></a></li>
+                    <li class="list-inline-item"><a href="mailto:greg.solo.cv@gmail.com" class="rounded"><i
+                        class="uil uil-envelope" title="Email"></i></a></li>
+                    <li class="list-inline-item"><a href="https://gregsolo.me/greg-solo-cv.pdf" class="rounded" target="_blank"><i
+                        class="uil uil-import" title="CV"></i></a></li>
+                    <li class="list-inline-item"><a href="javascript:void(0)" class="rounded toggle-theme"><i class="uil uil-palette" title="Toggle Light / Dark Theme"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!--end row-->
+            </div>
+            <!--end container-->
+        </footer>
+        <!--end footer-->
+        <!-- Footer End -->
+    
+        <!-- Back to top -->
+        <a href="#" onclick="topFunction()" id="back-to-top" class="btn btn-icon btn-primary back-to-top"><i
+                class="mdi mdi-arrow-up icons"></i></a>
+        <!-- Back to top -->
+    
+        <!-- Javascript -->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+         <script src="/js/gifffer.js"></script>
+    
+        <!-- Switcher -->
+        <script type="module" src="/js/cookie.min.mjs"></script>
+    
+        <!-- Code highlight -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        
+        <!-- Main Js -->
+        <script type="module" src="/js/switcher.js"></script>
+       
+        <script src="/js/app.js"></script>
+  </body>
+</html>
